@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Ufouria Randomizer</title>
+    <link rel="stylesheet" href="bulma.min.css">
+    <script src="fontAwesome_all.js"></script>
+    <script src="randomizer.js"></script>
+    <!--script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script-->
+    <script src="vue_2_6_12.js"></script>
+    <script>
+      var crc32=function(r){for(var a,o=[],c=0;c<256;c++){a=c;for(var f=0;f<8;f++)a=1&a?3988292384^a>>>1:a>>>1;o[c]=a}for(var n=-1,t=0;t<r.length;t++)n=n>>>8^o[255&(n^r.charCodeAt(t))];return(-1^n)>>>0};
+    </script>
+    <style>
+      .btn-margin {
+          margin-top: 5px;
+      }
+      .subtitle {
+          margin-top: 20px;
+          margin-bottom: 2px;
+      }
+      .tr-green {
+          background-color: lawngreen;
+      }
+      .tr-yellow {
+          background-color: yellow;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="section" id="app">
+      <div class="container">
+        <p><a href="index.html">back</a></p>
+
+        <h1 class="title">
+          Ufouria Randomizer
+        </h1>
+
+        <div class="file">
+          <label class="file-label">
+            <input class="file-input" type="file" name="rom" id="rom" v-on:change="fileChange()" onclick="this.value=null">
+            <span class="file-cta">
+              <span class="file-icon">
+                <i class="fas fa-upload"></i>
+              </span>
+              <span class="file-label">
+                Upload an unmodified Ufouria (Europe) ROM
+              </span>
+            </span>
+          </label>
+        </div>
+
+        <div>
+          <span v-if="correctFileCRCcheck===true" style="color:green">
+            Valid ROM
+          </span>
+          <span v-if="correctFileCRCcheck===false" style="color:red">
+            Invalid ROM
+          </span>
+        </div>
+
+        <div class="btn-margin">
+          <button class="button" :disabled="correctFileCRCcheck!==true" v-on:click="randomizeRom()">Randomize</button>
+        </div>
+
+        <div class="btn-margin">
+          <a class="button" :disabled="randomized===false" :download="fname" :href="createBlobURL">Download Randomized ROM</a>
+          <button class="button" :disabled="randomized===false" v-on:click="toggleSpoilers()">
+            <span v-if="showing_spoilers">Hide Spoiler Log</span>
+            <span v-if="!showing_spoilers">Show Spoiler Log</span>
+          </button>
+        </div>
+
+        <div class="btn-margin">
+          <div v-if="showing_spoilers">
+            <div v-for="(sphere, idx) in spheres">
+              <p class="subtitle">Sphere {{ idx }}</p>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Location</th>
+                    <th>Item</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="location_item in sphere" v-bind:class="getRowClass(location_item)">
+                    <td>{{ nice_names[location_item[0]] }}</td>
+                    <td>{{ nice_names[location_item[1]] }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-if="unobtainable.length>0">
+              <p class="subtitle">Unobtainable</p>
+              <table class="table">
+                <thead>
+                <tr>
+                  <th>Location</th>
+                  <th>Item</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="location_item in unobtainable" v-bind:class="getRowClass(location_item)">
+                  <td>{{ nice_names[location_item[0]] }}</td>
+                  <td>{{ nice_names[location_item[1]] }}</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <script>
+      let app = new Vue({
+        el: '#app',
+        data: {
+          correctFileCRCcheck: null,
+          randomized: false,
+          spheres: [],
+          unobtainable: [],
+          randomized_rom: null,
+          showing_spoilers: false,
+          nice_names: {
+            'freeonFight': 'Freeon fight',
+            'shadesFight': 'Shades fight',
+            'gilFight': 'Gil fight',
+            'snowArea_byChimney': 'Snow Area - by chimney',
+            'startingArea_belowWater': 'Starting Area - below water',
+            'darkArea_inPit': 'Dark Area - in pit',
+            'westCliffsArea_floatingIslandTopCave': 'West Cliffs - island top cave',
+            'lavaChallenge_acrossIce': 'Lava Area - across lava',
+            'darkArea_pastMiniboss': 'Dark Area - past miniboss',
+            'westCliffsArea_hiddenDoor': 'West Cliffs - hidden door',
+            'startingArea_pastMiniboss': 'Starting Area - past miniboss',
+            'snowArea_deepestRoom': 'Snow Area - past miniboss',
+            'belowCloudsArea_shadesHover': 'Below Clouds Area - Shades hover',
+            'faucetArea_pastMiniboss': 'Faucet Area - past miniboss',
+            'cloudsArea_pastMiniboss': 'Clouds Area - past miniboss',
+            'startingArea_hill': 'Starting Area - hill',
+            'belowCloudsArea_byLongDrop': 'Below Clouds Area - by long drop',
+            'caveArea_alcoveNearPool': 'Cave Area - alcove near pool',
+            'caveArea_inPool': 'Cave Area - in pool',
+            'faucetArea_inWaterColumn': 'Faucet Area - in long water column',
+            'caveArea_pastLavaHopping': 'Cave Area - past lava hop',
+            'darkArea_byLight': 'Dark Area - by light',
+            'lavaChallenge_climbingIce': 'Lava Area - climbing ice',
+            'cloudsArea_startingAfterSpring': 'Clouds Area - start, after spring',
+            'faucetArea_aboveFaucetCave': 'Faucet Area - above faucet cave',
+            'westCliffsArea_inBigWaterRoom': 'West Cliffs - in big water room',
+            'finalBossCorridor': 'Final Boss Corridor',
+
+            'freeon': 'Freeon',
+            'shades': 'Shades',
+            'gil': 'Gil',
+            'heartContainer1': 'Heart Container 1',
+            'heartContainer2': 'Heart Container 2',
+            'heartContainer3': 'Heart Container 3',
+            'heartContainer4': 'Heart Container 4',
+            'blueKey': 'Blue Key',
+            'greenKey': 'Green Key',
+            'redKey': 'Red Key',
+            'bopsSpecial': "Bop's special",
+            'ice': "Freeon's ice",
+            'shadesSpecial': "Shade's special",
+            'bombs': "Gil's bombs",
+            'suction': 'Suction Cup',
+            'saveCrystal': 'Save Crystal',
+            'map': 'Map',
+            'compass': 'Compass',
+            'powerRing1': 'Power Ring 1',
+            'powerRing2': 'Power Ring 2',
+            'powerRing3': 'Power Ring 3',
+            'potion0': 'Potion 1',
+            'waterOfLife': 'Water of Life',
+            'insight': 'Power of insight',
+            'potion1': 'Potion 2',
+            'potion2': 'Potion 3',
+            'potion3': 'Potion 4',
+          }
+        },
+        methods: {
+          fileChange: function() {
+            app.correctFileCRCcheck = null;
+
+            const selectedFile = document.getElementById('rom').files[0];
+            let reader = new FileReader();
+
+            // crc check
+            reader.onload = function() {
+              let crcCheck = crc32(reader.result);
+              app.correctFileCRCcheck = (crcCheck === 1683224158);
+              reader.abort();
+            };
+            reader.readAsBinaryString(selectedFile);
+          },
+
+          randomizeRom: function() {
+            const selectedFile = document.getElementById('rom').files[0];
+            let reader = new FileReader();
+            app.randomized = false;
+            app.showing_spoilers = false;
+
+            // file processing
+            reader.onload = function() {
+              let view = new Uint8Array(reader.result);
+              let return_val = randomize(view);
+
+              app.spheres = return_val[0];
+              app.unobtainable = return_val[1];
+              app.randomized_rom = return_val[2];
+              app.randomized = true;
+
+              reader.abort();
+            }
+            reader.readAsArrayBuffer(selectedFile);
+          },
+
+          toggleSpoilers: function() {
+            this.showing_spoilers = !this.showing_spoilers;
+          },
+
+          getRowClass: function(loc_item) {
+            if (loc_item[1].includes('Key'))
+              return 'tr-green';
+            if (loc_item[1] === 'freeon' || loc_item[1] === 'suction' || loc_item[1] === 'gil')
+              return 'tr-yellow';
+            return '';
+          },
+
+          orderedLocItems: function(loc_items) {
+            return loc_items.sort((a, b) => (a[0] > b[1]) ? 1: -1)
+          }
+        },
+        computed: {
+          createBlobURL: function() {
+            if (!this.randomized) return '';
+            let blob = new Blob([app.randomized_rom], {
+              type: 'application/octet-stream'
+            });
+            return window.URL.createObjectURL(blob);
+          },
+
+          fname: function() {
+            let dt = new Date();
+            return `ufouria-${dt.toJSON()}.nes`;
+          }
+        }
+      })
+    </script>
+  </body>
+</html>
