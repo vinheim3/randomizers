@@ -277,7 +277,7 @@ let textPageContinuesToReplace = [
   conv(0x01, 0x19d6), // gil's special
 ]
 
-function randomize(rom) {
+function randomize(rom, rng, opts) {
   // build slots to mutate
   let r_slots = {};
 
@@ -327,8 +327,8 @@ function randomize(rom) {
     let available_treasures = [...treasureNames];
     let available_slots = Object.keys(r_slots);
     for (let i = 0; i < treasureNames.length; i += 1) {
-      let chosen_treasure = Math.floor(Math.random() * available_treasures.length);
-      let chosen_slot = Math.floor(Math.random() * available_slots.length);
+      let chosen_treasure = Math.floor(rng() * available_treasures.length);
+      let chosen_slot = Math.floor(rng() * available_slots.length);
       r_slots[available_slots[chosen_slot]].treasure = available_treasures[chosen_treasure];
       available_treasures.splice(chosen_treasure, 1);
       available_slots.splice(chosen_slot, 1);
@@ -425,8 +425,10 @@ function randomize(rom) {
   }
 
   // mutate qol - shorter text
-  for (let i = 0; i < textPageContinuesToReplace.length; i += 1)
-    rom[textPageContinuesToReplace[i]] = 0xff;
+  if (opts.romType !== 'JP') {
+    for (let i = 0; i < textPageContinuesToReplace.length; i += 1)
+      rom[textPageContinuesToReplace[i]] = 0xff;
+  }
 
   // todo: mutate qol - no dialog entities
   // bug: this prevents platforms from appearing

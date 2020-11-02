@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Ufouria Randomizer</title>
+    <title>Hebereke/Ufouria Randomizer</title>
     <link rel="stylesheet" href="bulma.min.css">
     <script src="fontAwesome_all.js"></script>
-    <script src="randomizer.js"></script>
     <!--script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script-->
     <script src="vue_2_6_12.js"></script>
+    <script src="seedrandom.js"></script>
+    <script src="randomizer.js"></script>
     <script>
       var crc32=function(r){for(var a,o=[],c=0;c<256;c++){a=c;for(var f=0;f<8;f++)a=1&a?3988292384^a>>>1:a>>>1;o[c]=a}for(var n=-1,t=0;t<r.length;t++)n=n>>>8^o[255&(n^r.charCodeAt(t))];return(-1^n)>>>0};
     </script>
@@ -32,7 +33,7 @@
         <p><a href="index.html">back</a></p>
 
         <h1 class="title">
-          Ufouria Randomizer
+          Hebereke/Ufouria Randomizer
         </h1>
 
         <div class="file">
@@ -43,10 +44,17 @@
                 <i class="fas fa-upload"></i>
               </span>
               <span class="file-label">
-                Upload an unmodified Ufouria (Europe) ROM
+                Upload an unmodified Hebereke/Ufouria ROM
               </span>
             </span>
           </label>
+        </div>
+
+        <div class="field">
+          <label class="label">Seed</label>
+          <div class="control">
+            <input class="input" type="text" v-model="seed" style="width:30%">
+          </div>
         </div>
 
         <div>
@@ -120,6 +128,8 @@
           unobtainable: [],
           randomized_rom: null,
           showing_spoilers: false,
+          romType: 'EU',
+          seed: "",
           nice_names: {
             'freeonFight': 'Freeon fight',
             'shadesFight': 'Shades fight',
@@ -188,13 +198,28 @@
             // crc check
             reader.onload = function() {
               let crcCheck = crc32(reader.result);
-              app.correctFileCRCcheck = (crcCheck === 1683224158);
+              if (crcCheck === 1683224158) {
+                app.correctFileCRCcheck = true;
+                app.romType = 'EU';
+              } else if (crcCheck === 705919348) {
+                app.correctFileCRCcheck = true;
+                app.romType = 'JP';
+              } else {
+                app.correctFileCRCcheck = false;
+              }
               reader.abort();
             };
             reader.readAsBinaryString(selectedFile);
           },
 
           randomizeRom: function() {
+            // use seed if provided, or gen one
+            let myrng;
+            if (app.seed === '') {
+              app.seed = +(new Date()); 
+            }
+            myrng = new Math.seedrandom(app.seed);
+
             const selectedFile = document.getElementById('rom').files[0];
             let reader = new FileReader();
             app.randomized = false;
@@ -203,7 +228,7 @@
             // file processing
             reader.onload = function() {
               let view = new Uint8Array(reader.result);
-              let return_val = randomize(view);
+              let return_val = randomize(view, myrng, {romType: app.romType});
 
               app.spheres = return_val[0];
               app.unobtainable = return_val[1];
