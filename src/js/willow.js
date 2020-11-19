@@ -588,6 +588,9 @@ function randomize(rom, rng, opts) {
         }
     }
 
+    // remove diskdude header bytes
+    splice(rom, 7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+
     // shorten some complex npc flag checking first
     splice(rom, conv(6, 0x254b), 2, globalFlags.GF_HEALMACE_MAGIC, 0x10, globalFlags.GF_WOOD_SHIELD, 0x0f, 0x0e); // 0a
     splice(rom, conv(6, 0x2559), 2, globalFlags.GF_DRAGON_SWORD, 0x3a, globalFlags.GF_SCALE_ITEM, 0x6a, 0x6f); // 0d
