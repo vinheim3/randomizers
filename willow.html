@@ -2,13 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Hebereke/Ufouria Randomizer</title>
+    <title>Willow Randomizer</title>
     <link rel="stylesheet" href="bulma.min.css">
     <script src="fontAwesome_all.js"></script>
     <!--script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script-->
     <script src="vue_2_6_12.js"></script>
     <script src="seedrandom.js"></script>
-    <script src="src/js/ufouria.js"></script>
+    <script src="src/js/willow.js"></script>
     <script>
       var crc32=function(r){for(var a,o=[],c=0;c<256;c++){a=c;for(var f=0;f<8;f++)a=1&a?3988292384^a>>>1:a>>>1;o[c]=a}for(var n=-1,t=0;t<r.length;t++)n=n>>>8^o[255&(n^r.charCodeAt(t))];return(-1^n)>>>0};
     </script>
@@ -34,7 +34,7 @@
         <p><a href="index.html">back</a></p>
 
         <h1 class="title">
-          Hebereke/Ufouria Randomizer
+          Willow Randomizer
         </h1>
 
         <div class="file">
@@ -45,11 +45,20 @@
                 <i class="fas fa-upload"></i>
               </span>
               <span class="file-label">
-                Upload an unmodified Hebereke/Ufouria ROM
+                Upload an unmodified Willow ROM
               </span>
             </span>
           </label>
         </div>
+
+        <div>
+            <span v-if="correctFileCRCcheck===true" style="color:green">
+              Valid ROM
+            </span>
+            <span v-if="correctFileCRCcheck===false" style="color:red">
+              Invalid ROM
+            </span>
+          </div>
 
         <div class="field">
           <label class="label">Seed</label>
@@ -58,13 +67,54 @@
           </div>
         </div>
 
-        <div>
-          <span v-if="correctFileCRCcheck===true" style="color:green">
-            Valid ROM
-          </span>
-          <span v-if="correctFileCRCcheck===false" style="color:red">
-            Invalid ROM
-          </span>
+        <div class="field">
+            <label class="label">Exp multiplier</label>
+            <div class="control">
+                <label class="radio">
+                  <input type="radio" v-model="exp_multiplier" value="0.25">
+                  25%
+                </label>
+                <label class="radio">
+                  <input type="radio" v-model="exp_multiplier" value="0.5">
+                  50%
+                </label>
+                <label class="radio">
+                  <input type="radio" v-model="exp_multiplier" value="0.75">
+                  75%
+                </label>
+                <label class="radio">
+                  <input type="radio" v-model="exp_multiplier" value="1">
+                  100%
+                </label>
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label">No Flash</label>
+            <div class="control">
+                <input type="checkbox" v-model="no_flash">
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label">Fast Text</label>
+            <div class="control">
+                <input type="checkbox" v-model="fast_text">
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label">Fast Movement</label>
+            <div class="control">
+                <input type="checkbox" v-model="fast_movement">
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label">Start with Ocarina</label>
+            <div class="control">
+                <input type="checkbox" v-model="ocarina_start">
+            </div>
         </div>
 
         <div class="btn-margin">
@@ -92,7 +142,7 @@
                 </thead>
                 <tbody>
                   <tr v-for="location_item in sphere" v-bind:class="getRowClass(location_item)">
-                    <td>{{ nice_names[location_item[0]] }}</td>
+                    <td>{{ location_item[0] }}</td>
                     <td>{{ nice_names[location_item[1]] }}</td>
                   </tr>
                 </tbody>
@@ -109,7 +159,7 @@
                 </thead>
                 <tbody>
                 <tr v-for="location_item in unobtainable" v-bind:class="getRowClass(location_item)">
-                  <td>{{ nice_names[location_item[0]] }}</td>
+                  <td>{{ location_item[0] }}</td>
                   <td>{{ nice_names[location_item[1]] }}</td>
                 </tr>
                 </tbody>
@@ -129,64 +179,60 @@
           unobtainable: [],
           randomized_rom: null,
           showing_spoilers: false,
-          romType: 'EU',
+          romType: 'US',
           seed: "",
-          nice_names: {
-            'freeonFight': 'Freeon fight',
-            'shadesFight': 'Shades fight',
-            'gilFight': 'Gil fight',
-            'snowArea_byChimney': 'Snow Area - by chimney',
-            'startingArea_belowWater': 'Starting Area - below water',
-            'darkArea_inPit': 'Dark Area - in pit',
-            'westCliffsArea_floatingIslandTopCave': 'West Cliffs - island top cave',
-            'lavaChallenge_acrossIce': 'Lava Area - across lava',
-            'darkArea_pastMiniboss': 'Dark Area - past miniboss',
-            'westCliffsArea_hiddenDoor': 'West Cliffs - hidden door',
-            'startingArea_pastMiniboss': 'Starting Area - past miniboss',
-            'snowArea_deepestRoom': 'Snow Area - past miniboss',
-            'belowCloudsArea_shadesHover': 'Below Clouds Area - Shades hover',
-            'faucetArea_pastMiniboss': 'Faucet Area - past miniboss',
-            'cloudsArea_pastMiniboss': 'Clouds Area - past miniboss',
-            'startingArea_hill': 'Starting Area - hill',
-            'belowCloudsArea_byLongDrop': 'Below Clouds Area - by long drop',
-            'caveArea_alcoveNearPool': 'Cave Area - alcove near pool',
-            'caveArea_inPool': 'Cave Area - in pool',
-            'faucetArea_inWaterColumn': 'Faucet Area - in long water column',
-            'caveArea_pastLavaHopping': 'Cave Area - past lava hop',
-            'darkArea_byLight': 'Dark Area - by light',
-            'lavaChallenge_climbingIce': 'Lava Area - climbing ice',
-            'cloudsArea_startingAfterSpring': 'Clouds Area - start, after spring',
-            'faucetArea_aboveFaucetCave': 'Faucet Area - above faucet cave',
-            'westCliffsArea_inBigWaterRoom': 'West Cliffs - in big water room',
-            'finalBossCorridor': 'Final Boss Corridor',
 
-            'freeon': 'Freeon',
-            'shades': 'Shades',
-            'gil': 'Gil',
-            'heartContainer1': 'Heart Container 1',
-            'heartContainer2': 'Heart Container 2',
-            'heartContainer3': 'Heart Container 3',
-            'heartContainer4': 'Heart Container 4',
-            'blueKey': 'Blue Key',
-            'greenKey': 'Green Key',
-            'redKey': 'Red Key',
-            'bopsSpecial': "Bop's special",
-            'ice': "Freeon's ice",
-            'shadesSpecial': "Shade's special",
-            'bombs': "Gil's bombs",
-            'suction': 'Suction Cup',
-            'saveCrystal': 'Save Crystal',
-            'map': 'Map',
-            'compass': 'Compass',
-            'powerRing1': 'Power Ring 1',
-            'powerRing2': 'Power Ring 2',
-            'powerRing3': 'Power Ring 3',
-            'potion0': 'Potion 1',
-            'waterOfLife': 'Water of Life',
-            'insight': 'Power of insight',
-            'potion1': 'Potion 2',
-            'potion2': 'Potion 3',
-            'potion3': 'Potion 4',
+          exp_multiplier: "1",
+          no_flash: true,
+          fast_text: true,
+          fast_movement: false,
+          ocarina_start: true,
+
+          nice_names: {
+            GF_UPGRADED_WING_SWORD: 'Upgraded Wing Sword',
+            GF_LONG_SWORD: 'Long Sword',
+            GF_BATTLE_SWORD: 'Battle Sword',
+            GF_FLAME_SWORD: 'Flame Sword',
+            GF_DRAGON_SWORD: 'Dragon Sword',
+            GF_WING_SWORD: 'Wing Sword',
+            GF_DEVIL_EYE_SWORD: 'Devil Eye Sword',
+            GF_KAISER_SWORD: 'Kaiser Sword',
+            GF_WONDER_SWORD: 'Wonder Sword',
+            GF_WOOD_SHIELD: 'Wood Shield',
+            GF_SMALL_SHIELD: 'Small Shield',
+            GF_GOLD_SHIELD: 'Gold Shield',
+            GF_DRAGON_SHIELD: 'Dragon Shield',
+            GF_METAL_SHIELD: 'Metal Shield',
+            GF_TAIL_SHIELD: 'Tail Shield',
+            GF_BATTLE_SHIELD: 'Battle Shield',
+            GF_FURY_SHIELD: 'Fury Shield',
+            GF_ACORN_MAGIC: 'Acorn Magic',
+            GF_BOMBARD_MAGIC: 'Bombard Magic',
+            GF_RENEW_MAGIC: 'Renew Magic',
+            GF_THUNDER_MAGIC: 'Thunder Magic',
+            GF_FIREFLOR_MAGIC: 'Flowing Fire Magic',
+            GF_CANE_MAGIC: 'Cane',
+            GF_TERSTORM_MAGIC: 'Terstorm Magic',
+            GF_HEALMACE_MAGIC: 'Healmace Magic',
+            GF_OCARINA_MAGIC: 'Ocarina',
+            GF_FLEET_MAGIC: 'Fleet Magic',
+            GF_SPECTER_MAGIC: 'Specter Magic',
+            GF_HEALBALL_MAGIC: 'Healball Magic',
+            GF_STATUE_ITEM: 'Gold Statue',
+            GF_RING_ITEM: 'Magic Ring',
+            GF_HERBS_ITEM: 'Herbs',
+            GF_SCALE_ITEM: 'Scale',
+            GF_BRACELET_ITEM: 'Bracelet',
+            GF_HANDCUFFS_KEY_ITEM: 'Handcuffs Key',
+            GF_FLUTE_ITEM: 'Cross Flute',
+            GF_RED_CRYSTAL_ITEM: 'Red Crystal',
+            GF_BLUE_CRYSTAL_ITEM: 'Blue Crystal',
+            GF_CREST_ITEM: 'Crest',
+            GF_WAKKA_ITEM: 'Wakka Seed',
+            GF_NOCKMAAR_KEY_ITEM: 'Nockmaar Key',
+            GF_NECKLACE_ITEM: 'Necklace',
+            GF_POWDER_ITEM: 'Powder',
+            GF_SHOES_ITEM: 'Shoes',
           }
         },
         methods: {
@@ -199,12 +245,9 @@
             // crc check
             reader.onload = function() {
               let crcCheck = crc32(reader.result);
-              if (crcCheck === 1683224158) {
+              if (crcCheck === 1602658405) {
                 app.correctFileCRCcheck = true;
-                app.romType = 'EU';
-              } else if (crcCheck === 705919348) {
-                app.correctFileCRCcheck = true;
-                app.romType = 'JP';
+                app.romType = 'US';
               } else {
                 app.correctFileCRCcheck = false;
               }
@@ -229,7 +272,14 @@
             // file processing
             reader.onload = function() {
               let view = new Uint8Array(reader.result);
-              let return_val = randomize(view, myrng, {romType: app.romType});
+              let return_val = randomize(view, myrng, {
+                  romType: app.romType,
+                  exp_multiplier: app.exp_multiplier,
+                  no_flash: app.no_flash,
+                  fast_text: app.fast_text,
+                  fast_movement: app.fast_movement,
+                  ocarina_start: app.ocarina_start,
+                });
 
               app.spheres = return_val[0];
               app.unobtainable = return_val[1];
@@ -246,10 +296,8 @@
           },
 
           getRowClass: function(loc_item) {
-            if (loc_item[1].includes('Key'))
+            if (loc_item[1] === 'GF_CANE_MAGIC')
               return 'tr-green';
-            if (loc_item[1] === 'freeon' || loc_item[1] === 'suction' || loc_item[1] === 'gil')
-              return 'tr-yellow';
             return '';
           },
 
@@ -268,7 +316,12 @@
 
           fname: function() {
             let dt = new Date();
-            return `ufouria-${dt.toJSON()}.nes`;
+            let flags = this.exp_multiplier;;
+            if (this.no_flash) flags += "f";
+            if (this.fast_text) flags += "t";
+            if (this.fast_movement) flags += "m";
+            if (this.ocarina_start) flags += "o";
+            return `willow-${this.seed}-${flags}.nes`;
           }
         }
       })
