@@ -297,7 +297,7 @@ let slots = [
     { // GF_DEVIL_EYE_SWORD
         name: 'Daikini center',
         reqs: ['daikini'],
-        textAddress: 0x2959, // 53
+        textAddress: 0x3f3f, // 53 - moved to eob
         globalFlagReplacements: [conv(6, 0x2626)], // 48
     },
     { // GF_HANDCUFFS_KEY_ITEM
@@ -632,6 +632,9 @@ function randomize(rom, rng, opts) {
             splice(rom, conv(1, v.textAddress), 0xf7, 0x35, 0xfe, ...text_replacement, 0x29, 0xfa, globalFlag, 0xfb, ...text_extras, 0xff);
         }
     }
+
+    // move script 53 due to 52 replacing some of it
+    splice(rom, conv(1, 0x00a6), 0x3f, 0xbf);
 
     // replace level requirements
     let expOffset = conv(7, 0x121b);
