@@ -616,8 +616,8 @@ function randomize(rom, rng, opts) {
             text_extras = [0xf5, 0x02, 0x02];
         if (k === 'Tir Asleen Castle after boss')
             text_extras = [0xf5, 0x1c, 0x02];
-        if (k === 'Towers crest')
-            text_extras = [0xf5, 0x1e, 0x1c];
+        // if (k === 'Towers crest')
+        //     text_extras = [0xf5, 0x1e, 0x1c];
 
         // text replacements
         if (k === 'Dew bottom-right house 1') {
