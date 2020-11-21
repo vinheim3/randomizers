@@ -146,11 +146,11 @@ let reqDefs = {
         'GF_STATUE_ITEM'
     ],
     death_forest: [
-        'GF_OCARINA_MAGIC',
+        'ocarina_start',
         'bogarda_cave'
     ],
     daikini: [
-        'GF_OCARINA_MAGIC',
+        'ocarina_start',
         ['death_forest', 'GF_BRACELET_ITEM']
     ],
     lake_area: [
@@ -166,7 +166,7 @@ let reqDefs = {
         ['river_cave', 'GF_SPECTER_MAGIC']
     ],
     nockmaar: [
-        ['GF_OCARINA_MAGIC', 'GF_SPECTER_MAGIC'],
+        ['ocarina_start', 'GF_SPECTER_MAGIC'],
         ['mountains', 'GF_POWDER_ITEM', 'GF_SPECTER_MAGIC']
     ],
     river_cave: [
@@ -174,7 +174,7 @@ let reqDefs = {
         ['tir_asleen', 'GF_SHOES_ITEM']
     ],
     tir_asleen: [
-        'GF_OCARINA_MAGIC',
+        'ocarina_start',
         ['river_cave', 'GF_SHOES_ITEM'],
         ['nockmaar', 'GF_POWDER_ITEM']
     ],
@@ -488,7 +488,7 @@ function randomize(rom, rng, opts) {
         let outstanding_misc_reqs = Object.keys(reqDefs);
         let gotten_items = [];
         if (opts.ocarina_start)
-            gotten_items.push('GF_OCARINA_MAGIC');
+            gotten_items.push('ocarina_start');
         spheres = [];
 
         while (true) {
