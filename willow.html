@@ -123,9 +123,13 @@
 
         <div class="btn-margin">
           <a class="button" :disabled="randomized===false" :download="fname" :href="createBlobURL">Download Randomized ROM</a>
-          <button class="button" :disabled="randomized===false" v-on:click="toggleSpoilers()">
+          <button class="button" :disabled="randomized===false" v-on:click="toggleShowing('spoilers')">
             <span v-if="showing_spoilers">Hide Spoiler Log</span>
             <span v-if="!showing_spoilers">Show Spoiler Log</span>
+          </button>
+          <button class="button" v-on:click="toggleShowing('logic')">
+            <span v-if="showing_logic">Hide Logic</span>
+            <span v-if="!showing_logic">Show Logic</span>
           </button>
         </div>
 
@@ -166,6 +170,38 @@
               </table>
             </div>
           </div>
+
+          <div v-if="showing_logic">
+            <h2 class="subtitle">Current Logic</h2>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Place</th>
+                  <th colspan="3">Requirements</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="place_req in place_reqs">
+                  <td>{{ place_req[0] }}</td>
+                  <td v-for="req in place_req[1]">{{ req }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Requirements</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item_req in item_reqs">
+                  <td>{{ item_req[0] }}</td>
+                  <td>{{ item_req[1] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>
@@ -178,7 +214,7 @@
           spheres: [],
           unobtainable: [],
           randomized_rom: null,
-          showing_spoilers: false,
+          data_showing: null,
           romType: 'US',
           seed: "",
 
@@ -233,8 +269,34 @@
             GF_NECKLACE_ITEM: 'Necklace',
             GF_POWDER_ITEM: 'Powder',
             GF_SHOES_ITEM: 'Shoes',
-          }
+          },
+
+          place_reqs: [
+            ['Bogarda cave', ['Statue', '', '']],
+            ['Death Forest', ['Ocarina', 'Bogarda Beaten', '']],
+            ['Daikini', ['Ocarina', 'Death Forest + Bracelet', '']],
+            ['Lake area', ['Daikini + Wakka seed', 'Mountains + Crest', '']],
+            ['Muzh + towers', ['Lake area + Flute', '', '']],
+            ['Mountains', ['Lake area + Crest', 'Nockmaar + Powder', 'River cave + Specter']],
+            ['Nockmaar castle', ['Ocarina + Specter', 'Mountains + Powder + Specter', '']],
+            ['River cave', ['Mountains + Specter', 'Tir Asleen + Shoes', '']],
+            ['Tir Asleen', ['Ocarina', 'River Cave + Shoes', 'Nockmaar + Powder']],
+            ['Win', ['Nockmaar + Key + Cane + Fin', '', '']],
+          ],
+
+          item_reqs: [
+            ["Dew Mayor's house", "Wood Shield"],
+            ["Dew dragon items", "Scale"],
+            ["Ocarina", "Herbs"],
+            ["Handcuffed guy", "Handcuffs key"],
+            ["Daikini rabbit", "Necklace"],
+            ["Left Tower", "Blue Crystal"],
+            ["Crest check", "Red Crystal"],
+            ["Abang at Nockmaar", "Wing Sword"],
+            ["Old lady in Tir Asleen House", "Wing Sword"]
+          ]
         },
+
         methods: {
           fileChange: function() {
             app.correctFileCRCcheck = null;
@@ -260,14 +322,15 @@
             // use seed if provided, or gen one
             let myrng;
             if (app.seed === '') {
-              app.seed = +(new Date()); 
+              app.seed = (+(new Date())).toString(16); 
             }
             myrng = new Math.seedrandom(app.seed);
 
             const selectedFile = document.getElementById('rom').files[0];
             let reader = new FileReader();
             app.randomized = false;
-            app.showing_spoilers = false;
+            if (app.showing === 'spoilers')
+              app.data_showing = null;
 
             // file processing
             reader.onload = function() {
@@ -291,8 +354,8 @@
             reader.readAsArrayBuffer(selectedFile);
           },
 
-          toggleSpoilers: function() {
-            this.showing_spoilers = !this.showing_spoilers;
+          toggleShowing: function(showing) {
+            this.data_showing = this.data_showing === showing ? null : showing;
           },
 
           getRowClass: function(loc_item) {
@@ -322,6 +385,14 @@
             if (this.fast_movement) flags += "m";
             if (this.ocarina_start) flags += "o";
             return `willow-${this.seed}-${flags}.nes`;
+          },
+
+          showing_spoilers: function() {
+            return this.data_showing === 'spoilers';
+          },
+
+          showing_logic: function() {
+            return this.data_showing === 'logic';
           }
         }
       })

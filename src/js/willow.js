@@ -154,7 +154,7 @@ let reqDefs = {
         ['death_forest', 'GF_BRACELET_ITEM']
     ],
     lake_area: [
-        ['death_forest', 'GF_WAKKA_ITEM'],
+        ['daikini', 'GF_WAKKA_ITEM'],
         ['mountains', 'GF_CREST_ITEM']
     ],
     muzh: [
@@ -179,7 +179,7 @@ let reqDefs = {
         ['nockmaar', 'GF_POWDER_ITEM']
     ],
     win: [
-        ['nockmaar', 'GF_NOCKMAAR_KEY_ITEM', 'GF_CANE_MAGIC']
+        ['nockmaar', 'GF_NOCKMAAR_KEY_ITEM', 'GF_CANE_MAGIC', 'lake_area']
     ]
 }
 
@@ -410,7 +410,7 @@ let slots = [
     },
     { // GF_NOCKMAAR_KEY_ITEM
         name: 'Tir Asleen old woman house',
-        reqs: ['nockmaar'],
+        reqs: ['nockmaar', 'GF_WING_SWORD'],
         textAddress: 0x2cf0, // 5c
         globalFlagReplacements: [conv(6, 0x2568)], // 10
     },
