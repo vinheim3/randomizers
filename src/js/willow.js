@@ -189,19 +189,19 @@ let slots = [
     // { // GF_LONG_SWORD - start with sword
     //     name: 'Nelwyn top-left house',
     //     reqs: [],
-    //     textAddress: 0x0309,
+    //     textAddress: 0x0309, // 06
     //     globalFlagReplacements: [conv(6, 0x2530)],
     // },
     { // GF_ACORN_MAGIC
         name: 'Nelwyn bottom-right house',
         reqs: [],
-        textAddress: 0x019f,
+        textAddress: 0x019f, // 02
         globalFlagReplacements: [conv(6, 0x2544)],
     },
     { // GF_WOOD_SHIELD
         name: 'Dew bottom-left house',
         reqs: [],
-        textAddress: 0x07cf,
+        textAddress: 0x07cf, // 15
         globalFlagReplacements: [conv(6, 0x2562)],
     },
     { // GF_HEALMACE_MAGIC - replaced flags
@@ -611,7 +611,13 @@ function randomize(rom, rng, opts) {
         }
 
         // setrooms
-        let text_extras = [];
+        let text_extras;
+        if (opts.healing_checks) {
+            text_extras = [0xfc, 0x00, 0xfc, 0x02];
+        } else {
+            text_extras = [];
+        }
+
         if (k === 'Bogarda boss')
             text_extras = [0xf5, 0x02, 0x02];
         if (k === 'Tir Asleen Castle after boss')
@@ -685,6 +691,10 @@ function randomize(rom, rng, opts) {
             0x4c, 0xb2, 0xde // jmp $deb2
         );
     }
+
+    // 0 mp ocarina
+    if (opts.no_mp_ocarina)
+        rom[conv(6, 0x0191)] = 0x00;
 
     // dont remove crest item
     rom[conv(1, 0x2ee8)] = 0xff;

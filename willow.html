@@ -117,6 +117,20 @@
             </div>
         </div>
 
+        <div class="field">
+          <label class="label">Checks heal HP and MP</label>
+          <div class="control">
+              <input type="checkbox" v-model="healing_checks">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">0 MP Ocarina</label>
+          <div class="control">
+              <input type="checkbox" v-model="no_mp_ocarina">
+          </div>
+        </div>
+
         <div class="btn-margin">
           <button class="button" :disabled="correctFileCRCcheck!==true" v-on:click="randomizeRom()">Randomize</button>
         </div>
@@ -223,6 +237,8 @@
           fast_text: true,
           fast_movement: false,
           ocarina_start: true,
+          healing_checks: true,
+          no_mp_ocarina: true,
 
           nice_names: {
             GF_UPGRADED_WING_SWORD: 'Upgraded Wing Sword',
@@ -342,6 +358,8 @@
                   fast_text: app.fast_text,
                   fast_movement: app.fast_movement,
                   ocarina_start: app.ocarina_start,
+                  healing_checks: app.healing_checks,
+                  no_mp_ocarina: app.no_mp_ocarina,
                 });
 
               app.spheres = return_val[0];
