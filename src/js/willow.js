@@ -146,11 +146,13 @@ let reqDefs = {
         'GF_STATUE_ITEM'
     ],
     death_forest: [
-        'ocarina_start',
+        ['ocarina_start', 'ocarina_po'],
+        ['GF_OCARINA_MAGIC', 'ocarina_po'],
         'bogarda_cave'
     ],
     daikini: [
-        'ocarina_start',
+        ['ocarina_start', 'ocarina_bar'],
+        ['GF_OCARINA_MAGIC', 'ocarina_bar'],
         ['death_forest', 'GF_BRACELET_ITEM']
     ],
     lake_area: [
@@ -166,7 +168,8 @@ let reqDefs = {
         ['river_cave', 'GF_SPECTER_MAGIC']
     ],
     nockmaar: [
-        ['ocarina_start', 'GF_SPECTER_MAGIC'],
+        ['ocarina_start', 'GF_SPECTER_MAGIC', 'ocarina_nockmaar'],
+        ['GF_OCARINA_MAGIC', 'GF_SPECTER_MAGIC', 'ocarina_nockmaar'],
         ['mountains', 'GF_POWDER_ITEM', 'GF_SPECTER_MAGIC']
     ],
     river_cave: [
@@ -174,7 +177,8 @@ let reqDefs = {
         ['tir_asleen', 'GF_SHOES_ITEM']
     ],
     tir_asleen: [
-        'ocarina_start',
+        ['ocarina_start', 'ocarina_tir_asleen'],
+        ['GF_OCARINA_MAGIC', 'ocarina_tir_asleen'],
         ['river_cave', 'GF_SHOES_ITEM'],
         ['nockmaar', 'GF_POWDER_ITEM']
     ],
@@ -487,8 +491,13 @@ function randomize(rom, rng, opts) {
         let outstanding_places = Object.keys(r_slots);
         let outstanding_misc_reqs = Object.keys(reqDefs);
         let gotten_items = [];
-        if (opts.ocarina_start)
-            gotten_items.push('ocarina_start');
+        for (let opt of [
+                'ocarina_start', 'ocarina_nelwyn', 'ocarina_dew', 'ocarina_po', 'ocarina_bar',
+                'ocarina_tir_asleen', 'ocarina_nockmaar'
+            ]) {
+                if (opts[opt])
+                    gotten_items.push(opt);
+            }
         spheres = [];
 
         while (true) {
@@ -677,20 +686,57 @@ function randomize(rom, rng, opts) {
         )
     }
 
-    // starting ocarina
+    // custom asm
+    let extra_asm = [];
+    let teleByte1 = 0;
+    let teleByte2 = 0;
+    if (opts.ocarina_nelwyn)
+        teleByte1 += 0x20;
+    if (opts.ocarina_dew)
+        teleByte1 += 0x40;
+    if (opts.ocarina_po)
+        teleByte1 += 0x80;
+    if (opts.ocarina_bar)
+        teleByte2 += 0x01;
+    if (opts.ocarina_tir_asleen)
+        teleByte2 += 0x02;
+    if (opts.ocarina_nockmaar)
+        teleByte2 += 0x03;
+
     if (opts.ocarina_start) {
-        splice(rom, conv(7, 0x1e8a), 0x20, 0x00, 0xbf); // jsr $bf00, 6:3f00
-        splice(
-            rom, conv(6, 0x3f00), 
+        extra_asm = [
+            ...extra_asm,
             0xa9, 0x02, // lda #$02
             0x8d, 0x06, 0x06, // sta $0606
-            0xa9, 0xe0, // lda #$e0
-            0x8d, 0x00, 0x06, // sta $0600
-            0xa9, 0x07, // lda #$07
-            0x8d, 0x01, 0x06, // sta $0601
-            0x4c, 0xb2, 0xde // jmp $deb2
-        );
+        ]
     }
+
+    extra_asm = [
+        ...extra_asm,
+        0xa9, teleByte1, // lda #$e0 (max)
+        0x8d, 0x00, 0x06, // sta $0600
+        0xa9, teleByte2, // lda #$07 (max)
+        0x8d, 0x01, 0x06, // sta $0601
+        0x4c, 0xb2, 0xde // jmp $deb2
+    ];
+
+    splice(rom, conv(7, 0x1e8a), 0x20, 0x00, 0xbf); // jsr $bf00, 6:3f00
+    splice(rom, conv(6, 0x3f00), ...extra_asm);
+
+    // custom ocarina code
+    rom[conv(6, 0x2fa2)] = 0xb8; // jmp $afb8
+    splice(rom, conv(6, 0x3073), 0x4c, 0x80, 0xbf); // jmp $bf80
+    splice(rom, conv(6, 0x3f80), ...[
+        0xa5, 0xf0, // lda $f0
+        0x18, // clc
+        0x69, 0x05, // adc #$05
+        0x20, 0x6c, 0xc4, // jsr $c46c (checkGlobalFlag)
+        0xd0, 0x03, // bne $03
+        0x4c, 0xdd, 0xaf, // jmp $afdd (after a/b button check)
+        0xa5, 0xf0, // lda $f0
+        0x0a, // asl a
+        0x4c, 0x7f, 0xb0 // jmp $b07f (tele'ing to a room)
+    ]);
 
     // 0 mp ocarina
     if (opts.no_mp_ocarina)

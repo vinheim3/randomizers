@@ -118,6 +118,28 @@
         </div>
 
         <div class="field">
+          <label class="label">Ocarina start locations</label>
+          <div class="control">
+              <input type="checkbox" v-model="ocarina_nelwyn"> Nelwyn
+          </div>
+          <div class="control">
+            <input type="checkbox" v-model="ocarina_dew"> Dew
+          </div>
+          <div class="control">
+            <input type="checkbox" v-model="ocarina_po"> Po's house
+          </div>
+          <div class="control">
+            <input type="checkbox" v-model="ocarina_bar"> Bar
+          </div>
+          <div class="control">
+            <input type="checkbox" v-model="ocarina_tir_asleen"> Tir Asleen
+          </div>
+          <div class="control">
+            <input type="checkbox" v-model="ocarina_nockmaar"> Nockmaar
+          </div>
+      </div>
+
+        <div class="field">
           <label class="label">Checks heal HP and MP</label>
           <div class="control">
               <input type="checkbox" v-model="healing_checks">
@@ -240,6 +262,13 @@
           healing_checks: true,
           no_mp_ocarina: true,
 
+          ocarina_nelwyn: true,
+          ocarina_dew: true,
+          ocarina_po: true,
+          ocarina_bar: true,
+          ocarina_tir_asleen: true,
+          ocarina_nockmaar: false,
+
           nice_names: {
             GF_UPGRADED_WING_SWORD: 'Upgraded Wing Sword',
             GF_LONG_SWORD: 'Long Sword',
@@ -351,16 +380,7 @@
             // file processing
             reader.onload = function() {
               let view = new Uint8Array(reader.result);
-              let return_val = randomize(view, myrng, {
-                  romType: app.romType,
-                  exp_multiplier: app.exp_multiplier,
-                  no_flash: app.no_flash,
-                  fast_text: app.fast_text,
-                  fast_movement: app.fast_movement,
-                  ocarina_start: app.ocarina_start,
-                  healing_checks: app.healing_checks,
-                  no_mp_ocarina: app.no_mp_ocarina,
-                });
+              let return_val = randomize(view, myrng, app);
 
               app.spheres = return_val[0];
               app.unobtainable = return_val[1];
@@ -397,11 +417,14 @@
 
           fname: function() {
             let dt = new Date();
-            let flags = this.exp_multiplier;;
-            if (this.no_flash) flags += "f";
-            if (this.fast_text) flags += "t";
-            if (this.fast_movement) flags += "m";
+            let flags = "";
             if (this.ocarina_start) flags += "o";
+            if (this.ocarina_nelwyn) flags += "n";
+            if (this.ocarina_dew) flags += "d";
+            if (this.ocarina_po) flags += "p";
+            if (this.ocarina_bar) flags += "b";
+            if (this.ocarina_tir_asleen) flags += "t";
+            if (this.ocarina_nockmaar) flags += "c";
             return `willow-${this.seed}-${flags}.nes`;
           },
 
