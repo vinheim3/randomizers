@@ -95,7 +95,7 @@ let shieldPreset = [0xf7, 0x20];
 let magicPreset = [0xf7, 0x14];
 let crystalPreset = [0xf7, 0x5c];
 let shortenedText = {
-    GF_UPGRADED_WING_SWORD: [...asc("UPGRADED WING "), ...swordPreset],
+    GF_UPGRADED_WING_SWORD: [...asc("WING "), ...swordPreset, ...asc(" UPGRADE")],
     GF_LONG_SWORD: [...asc("LONG "), ...swordPreset],
     GF_BATTLE_SWORD: [...asc("BATTLE "), ...swordPreset],
     GF_FLAME_SWORD: [...asc("FLAME "), ...swordPreset],
@@ -711,6 +711,16 @@ function randomize(rom, rng, opts) {
         ]
     }
 
+    if (opts.quick_start) {
+        extra_asm = [
+            ...extra_asm,
+            0xa9, 0x01, // lda #$01
+            0x8d, 0x03, 0x06, // sta $0603
+            0xa9, 0x14, // lda #20
+            0x85, 0x7a, // sta $7a
+        ]
+    }
+
     extra_asm = [
         ...extra_asm,
         0xa9, teleByte1, // lda #$e0 (max)
@@ -724,7 +734,7 @@ function randomize(rom, rng, opts) {
     splice(rom, conv(6, 0x3f00), ...extra_asm);
 
     // custom ocarina code
-    rom[conv(6, 0x2fa2)] = 0xb8; // jmp $afb8
+    rom[conv(6, 0x2fa2)] = 0xb8; // jmp $afb8 - skip checking if the next selected place not visited
     splice(rom, conv(6, 0x3073), 0x4c, 0x80, 0xbf); // jmp $bf80
     splice(rom, conv(6, 0x3f80), ...[
         0xa5, 0xf0, // lda $f0

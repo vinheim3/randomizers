@@ -153,6 +153,13 @@
           </div>
         </div>
 
+        <div class="field">
+          <label class="label">Quick start (long sword + 20mp)</label>
+          <div class="control">
+              <input type="checkbox" v-model="quick_start">
+          </div>
+        </div>
+
         <div class="btn-margin">
           <button class="button" :disabled="correctFileCRCcheck!==true" v-on:click="randomizeRom()">Randomize</button>
         </div>
@@ -268,6 +275,7 @@
           ocarina_bar: true,
           ocarina_tir_asleen: true,
           ocarina_nockmaar: false,
+          quick_start: true,
 
           nice_names: {
             GF_UPGRADED_WING_SWORD: 'Upgraded Wing Sword',
