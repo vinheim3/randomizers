@@ -752,6 +752,13 @@ function randomize(rom, rng, opts) {
     if (opts.no_mp_ocarina)
         rom[conv(6, 0x0191)] = 0x00;
 
+    // patch wall clip
+    if (opts.patch_wall_clip) {
+        rom[conv(2, 0x106d)] = 0x40;
+        rom[conv(2, 0x1074)] = 0x5f;
+        rom[conv(2, 0x1075)] = 0x40;
+    }
+
     // dont remove crest item
     rom[conv(1, 0x2ee8)] = 0xff;
 
