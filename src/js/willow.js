@@ -759,6 +759,10 @@ function randomize(rom, rng, opts) {
         rom[conv(2, 0x1075)] = 0x40;
     }
 
+    // ohko
+    if (opts.ohko)
+        splice(rom, conv(7, 0x3452), 0x4c, 0x60, 0xf4); // jmp $f460
+
     // dont remove crest item
     rom[conv(1, 0x2ee8)] = 0xff;
 

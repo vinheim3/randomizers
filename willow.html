@@ -167,6 +167,13 @@
           </div>
         </div>
 
+        <div class="field">
+          <label class="label">OHKO</label>
+          <div class="control">
+              <input type="checkbox" v-model="ohko">
+          </div>
+        </div>
+
         <div class="btn-margin">
           <button class="button" :disabled="correctFileCRCcheck!==true" v-on:click="randomizeRom()">Randomize</button>
         </div>
@@ -284,6 +291,7 @@
           ocarina_nockmaar: false,
           quick_start: true,
           patch_wall_clip: true,
+          ohko: false,
 
           nice_names: {
             GF_UPGRADED_WING_SWORD: 'Upgraded Wing Sword',
