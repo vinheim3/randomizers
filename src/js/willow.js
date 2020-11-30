@@ -605,7 +605,7 @@ function randomize(rom, rng, opts) {
     splice(rom, conv(6, 0x2559), 2, globalFlags.GF_DRAGON_SWORD, 0x3a, globalFlags.GF_SCALE_ITEM, 0x6a, 0x6f); // 0d
     splice(rom, conv(6, 0x2579), 2, globalFlags.GF_CREST_ITEM, 0x72, globalFlags.GF_RED_CRYSTAL_ITEM, 0x4a, 0x46); // 16
     splice(rom, conv(6, 0x2583), 1, globalFlags.GF_HERBS_ITEM, 0x1b, 0x2a); // 17
-    splice(rom, conv(6, 0x259b), 2, globalFlags.GF_WAKKA_ITEM, 0x39, globalFlags.GF_NECKLACE_ITEM, 0x38, 0x37); // 1d
+    splice(rom, conv(6, 0x259b), 1, globalFlags.GF_NECKLACE_ITEM, 0x38, 0x37); // 1d
     splice(rom, conv(6, 0x25a3), 1, globalFlags.GF_THUNDER_MAGIC, 0x4c, 0x4b); // 1e
     
     // mutate based on placement
