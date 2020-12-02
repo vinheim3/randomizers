@@ -23,14 +23,14 @@ let noFlashAddresses = [
     conv(6, 0x2f70),
     conv(6, 0x2f7e),
     conv(6, 0x3a50),
-    conv(7, 0x21e1),
-    conv(7, 0x220f),
-    conv(7, 0x2242),
-    conv(7, 0x229b),
-    conv(7, 0x392e),
-    conv(7, 0x3945),
-    conv(7, 0x39e6),
-    conv(7, 0x39fa)
+    conv(0xf, 0x21e1),
+    conv(0xf, 0x220f),
+    conv(0xf, 0x2242),
+    conv(0xf, 0x229b),
+    conv(0xf, 0x392e),
+    conv(0xf, 0x3945),
+    conv(0xf, 0x39e6),
+    conv(0xf, 0x39fa)
 ]
 
 let globalFlags = {
@@ -296,7 +296,7 @@ let slots = [
         name: 'Entering Daikini',
         reqs: ['daikini'],
         textAddress: 0x146d, // 33
-        globalFlagReplacements: [conv(7, 0x1ffb)],
+        globalFlagReplacements: [conv(0xf, 0x1ffb)],
     },
     { // GF_DEVIL_EYE_SWORD
         name: 'Daikini center',
@@ -326,7 +326,7 @@ let slots = [
         name: 'Lake Bridge',
         reqs: ['lake_area'],
         textAddress: 0x1ee6, // 42
-        globalFlagReplacements: [conv(7, 0x1fe6)],
+        globalFlagReplacements: [conv(0xf, 0x1fe6)],
     },
     { // GF_FLEET_MAGIC
         name: 'Confusing caves spiral',
@@ -356,7 +356,7 @@ let slots = [
         name: 'Muzh boss',
         reqs: ['muzh'],
         textAddress: 0x1fe1, // 44 (+2 to set muzh flag)
-        globalFlagReplacements: [conv(7, 0x36f7)],
+        globalFlagReplacements: [conv(0xf, 0x36f7)],
     },
     { // GF_BLUE_CRYSTAL_ITEM
         name: 'Towers right',
@@ -460,6 +460,15 @@ function randomize(rom, rng, opts) {
     let r_slots;
     let spheres;
     let unobtainable = [];
+
+    // expand rom to double prg rom
+    rom = Uint8Array.from([
+        ...rom.slice(0, conv(7, 0)), // header + original prg except last
+        ...(new Array(0x4000*8)), // extra 8 prg banks
+        ...rom.slice(conv(7, 0), conv(8, 0)), // last prg bank
+        ...rom.slice(conv(8, 0)) // chr banks
+    ]);
+    rom[4] = 0x10; // 16kb count
 
     // randomize slots
     while (true) {
@@ -652,7 +661,7 @@ function randomize(rom, rng, opts) {
     splice(rom, conv(1, 0x00a6), 0x3f, 0xbf);
 
     // replace level requirements
-    let expOffset = conv(7, 0x121b);
+    let expOffset = conv(0xf, 0x121b);
     for (let i = 0; i < 16; i++) {
         let levelOffset = expOffset + i*5;
         let expReq = rom[levelOffset]*10000 + rom[levelOffset+1]*1000 + rom[levelOffset+2]*100 + rom[levelOffset+3]*10 + rom[levelOffset+4];
@@ -730,7 +739,7 @@ function randomize(rom, rng, opts) {
         0x4c, 0xb2, 0xde // jmp $deb2
     ];
 
-    splice(rom, conv(7, 0x1e8a), 0x20, 0x00, 0xbf); // jsr $bf00, 6:3f00
+    splice(rom, conv(0xf, 0x1e8a), 0x20, 0x00, 0xbf); // jsr $bf00, 6:3f00
     splice(rom, conv(6, 0x3f00), ...extra_asm);
 
     // custom ocarina code
@@ -761,7 +770,7 @@ function randomize(rom, rng, opts) {
 
     // ohko
     if (opts.ohko)
-        splice(rom, conv(7, 0x3452), 0x4c, 0x60, 0xf4); // jmp $f460
+        splice(rom, conv(0xf, 0x3452), 0x4c, 0x60, 0xf4); // jmp $f460
 
     // dont remove crest item
     rom[conv(1, 0x2ee8)] = 0xff;
@@ -774,8 +783,8 @@ function randomize(rom, rng, opts) {
     splice(rom, conv(1, 0x1fdf), 0xfa, 0x4f);
 
     // check global flag - bogarda and muzh bosses
-    rom[conv(7, 0x3678)] = 0x4e;
-    rom[conv(7, 0x36f7)] = 0x4f;
+    rom[conv(0xf, 0x3678)] = 0x4e;
+    rom[conv(0xf, 0x36f7)] = 0x4f;
 
     // never hide the old woman above tir asleen
     splice(rom, conv(5, 0x1fd9), 0xed, 0x9e);
