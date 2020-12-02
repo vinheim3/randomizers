@@ -780,6 +780,17 @@ function randomize(rom, rng, opts) {
     if (opts.oneMPcane)
         rom[conv(6, 0x018e)] = 0x01
 
+    // up, A, up, A, down, A, down, A, left, B, left, B, right, B, right, B
+    if (opts.debugCombo) {
+        splice(rom, conv(0xf, 0x3344), 0x20, 0x00, 0xbc); // jsr $bc00
+        rom[conv(0xf, 0x2ce6)] = 0x00;
+        rom[conv(0xf, 0x2cea)] = 0xf0; // beq
+        splice(rom, conv(6, 0x3c00), ...[
+            0x20, 0x94, 0x9d, // jsr $9d94
+            0x4c, 0xd5, 0xec, // jmp $ecd5
+        ]);
+    }
+
     // 0 mp ocarina
     if (opts.no_mp_ocarina)
         rom[conv(6, 0x0191)] = 0x00;

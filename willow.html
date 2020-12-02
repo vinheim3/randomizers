@@ -204,6 +204,13 @@
                 <input type="checkbox" v-model="ohko">
             </div>
           </div>
+
+          <div class="field">
+            <label class="label">Enable debug cheat code</label>
+            <div class="control">
+                <input type="checkbox" v-model="debugCombo">
+            </div>
+          </div>
         </div>
 
         <div class="btn-margin">
@@ -326,6 +333,7 @@
           quick_start: true,
           patch_wall_clip: true,
           ohko: false,
+          debugCombo: false,
 
           nice_names: {
             GF_UPGRADED_WING_SWORD: 'Upgraded Wing Sword',
