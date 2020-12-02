@@ -118,6 +118,35 @@
               <input type="checkbox" v-model="ocarina_nockmaar"> Nockmaar
             </div>
           </div>
+
+          <div class="field">
+            <label class="label">Starting location</label>
+            <div class="control">
+                <label class="radio">
+                  <input type="radio" v-model="starting_loc" value="nelwyn">
+                  Nelwyn
+                </label>
+                <label class="radio">
+                  <input type="radio" v-model="starting_loc" value="dew">
+                  Dew
+                </label>
+                <label class="radio">
+                  <input type="radio" v-model="starting_loc" value="posHouse">
+                  Po's house
+                </label>
+                <label class="radio">
+                  <input type="radio" v-model="starting_loc" value="bar">
+                  Bar
+                </label>
+                <label class="radio">
+                  <input type="radio" v-model="starting_loc" value="tirAsleen">
+                  Tir Asleen
+                </label>
+                <label class="radio">
+                  <input type="radio" v-model="starting_loc" value="nockmaar">
+                  Nockmaar
+                </label>
+            </div>
         </div>
 
         <div v-show="tab==='modifiers'">
@@ -328,8 +357,10 @@
           romType: 'US',
           seed: "",
           tab: 'logic',
+          version: '0.1.0',
 
           exp_multiplier: "1",
+          starting_loc: "nelwyn",
           no_flash: true,
           fast_text: true,
           fast_movement: false,
@@ -508,15 +539,19 @@
 
           fname: function() {
             let dt = new Date();
-            let flags = "";
-            if (this.ocarina_start) flags += "o";
-            if (this.ocarina_nelwyn) flags += "n";
-            if (this.ocarina_dew) flags += "d";
-            if (this.ocarina_po) flags += "p";
-            if (this.ocarina_bar) flags += "b";
-            if (this.ocarina_tir_asleen) flags += "t";
-            if (this.ocarina_nockmaar) flags += "c";
-            return `willow-${this.seed}-${flags}.nes`;
+            let flags = `S${this.starting_loc[0]}`;
+            if (this.ocarina_start) flags += "O";
+            let startTeleByte = 0;
+            if (this.ocarina_nelwyn) startTeleByte += 1;
+            if (this.ocarina_dew) startTeleByte += 2;
+            if (this.ocarina_po) startTeleByte += 4;
+            if (this.ocarina_bar) startTeleByte += 8;
+            if (this.ocarina_tir_asleen) startTeleByte += 16;
+            if (this.ocarina_nockmaar) startTeleByte += 32;
+            if (startTeleByte !== 0) {
+              flags += `W${startTeleByte.toString(16)}`;
+            }
+            return `willow-${this.seed}-${flags}-${this.version}.nes`;
           },
 
           showing_spoilers: function() {

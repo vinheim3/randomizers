@@ -211,18 +211,28 @@ let shortenedText = {
 }
 
 let reqDefs = {
+    nelwynDew: [
+        'starting_nelwyn',
+        'starting_dew',
+        ['GF_OCARINA_MAGIC', 'ocarina_nelwyn'],
+        ['GF_OCARINA_MAGIC', 'ocarina_dew'],
+        ['ocarina_start', 'ocarina_nelwyn'],
+        ['ocarina_start', 'ocarina_dew'],
+    ],
     bogarda_cave: [
-        'GF_STATUE_ITEM'
+        ['nelwynDew', 'GF_STATUE_ITEM'],
     ],
     death_forest: [
         ['ocarina_start', 'ocarina_po'],
         ['GF_OCARINA_MAGIC', 'ocarina_po'],
-        'bogarda_cave'
+        'bogarda_cave',
+        'starting_po',
     ],
     daikini: [
         ['ocarina_start', 'ocarina_bar'],
         ['GF_OCARINA_MAGIC', 'ocarina_bar'],
-        ['death_forest', 'GF_BRACELET_ITEM']
+        ['death_forest', 'GF_BRACELET_ITEM'],
+        'starting_bar',
     ],
     lake_area: [
         ['daikini', 'GF_WAKKA_ITEM'],
@@ -239,7 +249,8 @@ let reqDefs = {
     nockmaar: [
         ['ocarina_start', 'GF_SPECTER_MAGIC', 'ocarina_nockmaar'],
         ['GF_OCARINA_MAGIC', 'GF_SPECTER_MAGIC', 'ocarina_nockmaar'],
-        ['mountains', 'GF_POWDER_ITEM', 'GF_SPECTER_MAGIC']
+        ['mountains', 'GF_POWDER_ITEM', 'GF_SPECTER_MAGIC'],
+        'starting_nockmaar',
     ],
     river_cave: [
         ['mountains', 'GF_SPECTER_MAGIC'],
@@ -249,7 +260,8 @@ let reqDefs = {
         ['ocarina_start', 'ocarina_tir_asleen'],
         ['GF_OCARINA_MAGIC', 'ocarina_tir_asleen'],
         ['river_cave', 'GF_SHOES_ITEM'],
-        ['nockmaar', 'GF_POWDER_ITEM']
+        ['nockmaar', 'GF_POWDER_ITEM'],
+        'starting_tirAsleen',
     ],
     win: [
         ['nockmaar', 'GF_NOCKMAAR_KEY_ITEM', 'GF_CANE_MAGIC', 'lake_area']
@@ -267,43 +279,43 @@ let slots = [
     // },
     { // GF_ACORN_MAGIC
         name: 'Nelwyn bottom-right house',
-        reqs: [],
+        reqs: ['nelwynDew'],
         textAddress: 0x019f, // 02
         globalFlagReplacements: [conv(6, 0x2544)],
     },
     { // GF_WOOD_SHIELD
         name: 'Dew bottom-left house',
-        reqs: [],
+        reqs: ['nelwynDew'],
         textAddress: 0x07cf, // 15
         globalFlagReplacements: [conv(6, 0x2562)],
     },
     { // GF_HEALMACE_MAGIC - replaced flags
         name: 'Dew Mayor\'s house',
-        reqs: ['GF_WOOD_SHIELD'],
+        reqs: ['nelwynDew', 'GF_WOOD_SHIELD'],
         textAddress: 0x05dc, // 0f
         globalFlagReplacements: [conv(6, 0x254c)], // 0a
     },
     { // GF_DRAGON_SWORD - replaced flags
         name: 'Dew bottom-right house 1',
-        reqs: ['GF_SCALE_ITEM'],
+        reqs: ['nelwynDew', 'GF_SCALE_ITEM'],
         textAddress: 0x332d, // 6a
         globalFlagReplacements: [conv(6, 0x255a)], // 0d
     },
     { // GF_DRAGON_SHIELD
         name: 'Dew bottom-right house 2',
-        reqs: ['GF_SCALE_ITEM'],
+        reqs: ['nelwynDew', 'GF_SCALE_ITEM'],
         textAddress: 0x332d,
         globalFlagReplacements: [conv(6, 0x255a)],
     },
     { // GF_SMALL_SHIELD
         name: 'Dew side cave',
-        reqs: [],
+        reqs: ['nelwynDew'],
         textAddress: 0x0d4c, // 26
         globalFlagReplacements: [conv(6, 0x25d4)], // 2f
     },
     { // GF_STATUE_ITEM
         name: 'Bogarda Forest',
-        reqs: [],
+        reqs: ['nelwynDew'],
         textAddress: 0x0bab, // 23
         globalFlagReplacements: [conv(6, 0x25d0)], // 2e
     },
@@ -525,6 +537,42 @@ let slots = [
     },
 ]
 
+let startingLocData = {
+    nelwyn: {
+        node: 'starting_nelwyn',
+        y: 0x1a,
+        x: 0x0e,
+        chrBank: 0x04,
+    },
+    dew: {
+        node: 'starting_dew',
+        y: 0x13,
+        x: 0x0f,
+        chrBank: 0x04,
+    },
+    posHouse: {
+        node: 'starting_po',
+        y: 0x13,
+        x: 0x03,
+    },
+    bar: {
+        node: 'starting_bar',
+        y: 0x0a,
+        x: 0x09,
+        chrBank: 0x00,
+    },
+    tirAsleen: {
+        node: 'starting_tirAsleen',
+        y: 0x0f,
+        x: 0x19,
+    },
+    nockmaar: {
+        node: 'starting_nockmaar',
+        y: 0x02,
+        x: 0x18,
+    },
+}
+
 function randomize(rom, rng, opts) {
     let r_slots;
     let spheres;
@@ -589,6 +637,7 @@ function randomize(rom, rng, opts) {
                 if (opts[opt])
                     gotten_items.push(opt);
             }
+        gotten_items.push(startingLocData[opts.starting_loc].node);
         spheres = [];
 
         while (true) {
@@ -870,6 +919,14 @@ function randomize(rom, rng, opts) {
             0x4c, 0xd5, 0xec, // jmp $ecd5
         ])
         splice(rom, conv(0xf, 0x3344), ...jsr(debugFuncAddr));
+    }
+
+    // starting loc
+    if (opts.starting_loc !== 'nelwyn') {
+        rom[conv(0xf, 0x1eb3)] = startingLocData[opts.starting_loc].y;
+        rom[conv(0xf, 0x1eb7)] = startingLocData[opts.starting_loc].x;
+        // todo: finish chr banks, also get palettes and music
+        //rom[conv(0xf, 0x1edd)] = startingLocData[opts.starting_loc].chrBank;
     }
 
     // proper checkpoint control
