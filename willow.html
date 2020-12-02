@@ -151,6 +151,13 @@
                 <input type="checkbox" v-model="oneMPcane">
             </div>
           </div>
+
+          <div class="field" style="margin-left:20px">
+            <label class="label">1 MP Cane (only against Bavmorda)</label>
+            <div class="control">
+                <input :disabled="!oneMPcane" type="checkbox" v-model="oneMPcaneBavmorda">
+            </div>
+          </div>
         </div>
 
         <div v-show="tab==='patches'">
@@ -323,6 +330,7 @@
           healing_checks: true,
           no_mp_ocarina: true,
           oneMPcane: false,
+          oneMPcaneBavmorda: false,
 
           ocarina_nelwyn: true,
           ocarina_dew: true,

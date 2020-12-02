@@ -60,19 +60,46 @@ let litEnd = function(word) {
 let sym = {
     setGlobalFlag: 0xc460,
     wLastCheckpoint: 0x4f8,
+    magicMPReqs: 0x8189,
+    wRoomX: 0x42,
+    wRoomY: 0x43,
+}
+
+let aMode = {
+    abs: 0,
+    absY: 1,
+    imm: 2,
+    zpg: 3,
 }
 
 let jsr = function(addr) {
     return [0x20, ...litEnd(addr)];
 }
+let pha = [0x48];
 let jmp = function(addr) {
     return [0x4c, ...litEnd(addr)];
 }
-let sta = function(addr) {
-    return [0x8d, ...litEnd(addr)]; // sta abs
+let rts = [0x60];
+let sta = function(addr, mode) {
+    if (mode === aMode.abs)
+        return [0x8d, ...litEnd(addr)];
 }
-let cmp = function(addr) {
-    return [0xcd, ...litEnd(addr)]; // cmp abs
+let lda = function(addr, mode) {
+    if (mode === aMode.absY)
+        return [0xb9, ...litEnd(addr)];
+    if (mode === aMode.zpg)
+        return [0xa5, addr];
+    if (mode === aMode.imm)
+        return [0xa9, addr];
+}
+let cmp = function(addr, mode) {
+    if (mode === aMode.imm)
+        return [0xc9, addr];
+    if (mode === aMode.abs)
+        return [0xcd, ...litEnd(addr)];
+}
+let bne = function(addr) {
+    return [0xd0, addr];
 }
 
 let globalFlags = {
@@ -813,8 +840,26 @@ function randomize(rom, rng, opts) {
     splice(rom, conv(6, 0x3073), 0x4c, ...litEnd(customOcarinaAddr)); // jmp customOcarinaAddr
 
     // 1 mp cane
-    if (opts.oneMPcane)
-        rom[conv(6, 0x018e)] = 0x01
+    if (opts.oneMPcane) {
+        // only in final fight
+        if (opts.oneMPcaneBavmorda) {
+            let checkFinalFightAddr = addToEob(6, [
+                ...lda(sym.wRoomY, aMode.zpg),
+                ...cmp(0x11, aMode.imm),
+                ...bne(0x07),
+                ...lda(sym.wRoomX, aMode.zpg),
+                ...cmp(0x1b, aMode.imm),
+                ...bne(0x03),
+                ...lda(0x01, aMode.imm),
+                ...rts,
+                ...lda(sym.magicMPReqs, aMode.absY),
+                ...rts,
+            ]);
+            splice(rom, conv(6, 0x0154), ...jsr(checkFinalFightAddr));
+        } else {
+            rom[conv(6, 0x018e)] = 0x01;
+        }
+    }
 
     // up, A, up, A, down, A, down, A, left, B, left, B, right, B, right, B
     if (opts.debugCombo) {
@@ -824,16 +869,16 @@ function randomize(rom, rng, opts) {
             0x20, 0x94, 0x9d, // jsr $9d94
             0x4c, 0xd5, 0xec, // jmp $ecd5
         ])
-        splice(rom, conv(0xf, 0x3344), ...jsr(debugFuncAddr)); // jsr debugFuncAddr
+        splice(rom, conv(0xf, 0x3344), ...jsr(debugFuncAddr));
     }
 
     // proper checkpoint control
     let newCheckpointFuncAddr = addToEob(6, [
-        ...sta(sym.wLastCheckpoint),
+        ...sta(sym.wLastCheckpoint, aMode.abs),
         ...jmp(sym.setGlobalFlag),
     ]);
     splice(rom, conv(0xf, 0x1f6f), ...jsr(newCheckpointFuncAddr));
-    splice(rom, conv(6, 0x38c9), ...cmp(sym.wLastCheckpoint), 0xf0); // beq
+    splice(rom, conv(6, 0x38c9), ...cmp(sym.wLastCheckpoint, aMode.abs), 0xf0); // beq
 
     // 0 mp ocarina
     if (opts.no_mp_ocarina)
