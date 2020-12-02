@@ -26,11 +26,14 @@
       .tr-yellow {
           background-color: yellow;
       }
+      html {
+        background-image: url('willowBG.png');
+      }
     </style>
   </head>
   <body>
     <section class="section" id="app">
-      <div class="container">
+      <div class="container box">
         <p><a href="index.html">back</a></p>
 
         <h1 class="title">
@@ -66,6 +69,8 @@
             <input class="input" type="text" v-model="seed" style="width:30%">
           </div>
         </div>
+
+        <hr/>
 
         <div class="tabs is-centered">
           <ul>
@@ -219,6 +224,8 @@
             </div>
           </div>
         </div>
+
+        <hr/>
 
         <div class="btn-margin">
           <button class="button" :disabled="correctFileCRCcheck!==true" v-on:click="randomizeRom()">Randomize</button>
