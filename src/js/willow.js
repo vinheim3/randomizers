@@ -52,6 +52,29 @@ let eobs = [
     0x4000, // 0f
 ]
 
+// little-endian
+let litEnd = function(word) {
+    return [word & 0xff, word >> 8];
+}
+
+let sym = {
+    setGlobalFlag: 0xc460,
+    wLastCheckpoint: 0x4f8,
+}
+
+let jsr = function(addr) {
+    return [0x20, ...litEnd(addr)];
+}
+let jmp = function(addr) {
+    return [0x4c, ...litEnd(addr)];
+}
+let sta = function(addr) {
+    return [0x8d, ...litEnd(addr)]; // sta abs
+}
+let cmp = function(addr) {
+    return [0xcd, ...litEnd(addr)]; // cmp abs
+}
+
 let globalFlags = {
     GF_UPGRADED_WING_SWORD: 0x03,
     // GF_LONG_SWORD: 0x18,
@@ -493,11 +516,6 @@ function randomize(rom, rng, opts) {
         return currEob + 0x8000;
     }
 
-    // little-endian
-    function litEnd(word) {
-        return [word & 0xff, word >> 8];
-    }
-
     // expand rom to double prg rom
     rom = Uint8Array.from([
         ...rom.slice(0, conv(7, 0)), // header + original prg except last
@@ -806,8 +824,16 @@ function randomize(rom, rng, opts) {
             0x20, 0x94, 0x9d, // jsr $9d94
             0x4c, 0xd5, 0xec, // jmp $ecd5
         ])
-        splice(rom, conv(0xf, 0x3344), 0x20, ...litEnd(debugFuncAddr)); // jsr debugFuncAddr
+        splice(rom, conv(0xf, 0x3344), ...jsr(debugFuncAddr)); // jsr debugFuncAddr
     }
+
+    // proper checkpoint control
+    let newCheckpointFuncAddr = addToEob(6, [
+        ...sta(sym.wLastCheckpoint),
+        ...jmp(sym.setGlobalFlag),
+    ]);
+    splice(rom, conv(0xf, 0x1f6f), ...jsr(newCheckpointFuncAddr));
+    splice(rom, conv(6, 0x38c9), ...cmp(sym.wLastCheckpoint), 0xf0); // beq
 
     // 0 mp ocarina
     if (opts.no_mp_ocarina)
