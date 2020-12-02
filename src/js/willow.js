@@ -31,6 +31,25 @@ let noFlashAddresses = [
     conv(0xf, 0x3945),
     conv(0xf, 0x39e6),
     conv(0xf, 0x39fa)
+];
+
+let eobs = [
+    0x3fdc, // 00
+    0x3f3f, // 01
+    0x3fc0, // 02
+    0x3fde, // 03
+    0x3fd9, // 04
+    0x3c00, // 05 - random word at 3bfe
+    0x3c00, // 06
+    0x0, // 07
+    0x0, // 08
+    0x0, // 09
+    0x0, // 0a
+    0x0, // 0b
+    0x0, // 0c
+    0x0, // 0d
+    0x0, // 0e
+    0x4000, // 0f
 ]
 
 let globalFlags = {
@@ -756,6 +775,10 @@ function randomize(rom, rng, opts) {
         0x0a, // asl a
         0x4c, 0x7f, 0xb0 // jmp $b07f (tele'ing to a room)
     ]);
+
+    // 1 mp cane
+    if (opts.oneMPcane)
+        rom[conv(6, 0x018e)] = 0x01
 
     // 0 mp ocarina
     if (opts.no_mp_ocarina)

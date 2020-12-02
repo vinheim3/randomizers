@@ -144,6 +144,13 @@
                 <input type="checkbox" v-model="no_mp_ocarina">
             </div>
           </div>
+
+          <div class="field">
+            <label class="label">1 MP Cane</label>
+            <div class="control">
+                <input type="checkbox" v-model="oneMPcane">
+            </div>
+          </div>
         </div>
 
         <div v-show="tab==='patches'">
@@ -308,6 +315,7 @@
           ocarina_start: true,
           healing_checks: true,
           no_mp_ocarina: true,
+          oneMPcane: false,
 
           ocarina_nelwyn: true,
           ocarina_dew: true,
