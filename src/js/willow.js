@@ -479,6 +479,24 @@ function randomize(rom, rng, opts) {
     let r_slots;
     let spheres;
     let unobtainable = [];
+    let currEobs = [...eobs];
+
+    function addToEob(bank, data) {
+        let currEob = currEobs[bank];
+        if (currEob + data.length >= 0x4000)
+            throw new Error(`eob ${bank}`);
+        splice(rom, conv(bank, currEob), ...data);
+        currEobs[bank] = currEob + data.length;
+
+        if (bank === 0xf)
+            return currEob + 0xc000;
+        return currEob + 0x8000;
+    }
+
+    // little-endian
+    function litEnd(word) {
+        return [word & 0xff, word >> 8];
+    }
 
     // expand rom to double prg rom
     rom = Uint8Array.from([
@@ -715,7 +733,7 @@ function randomize(rom, rng, opts) {
     }
 
     // custom asm
-    let extra_asm = [];
+    let extraInitAsm = [];
     let teleByte1 = 0;
     let teleByte2 = 0;
     if (opts.ocarina_nelwyn)
@@ -732,16 +750,16 @@ function randomize(rom, rng, opts) {
         teleByte2 += 0x03;
 
     if (opts.ocarina_start) {
-        extra_asm = [
-            ...extra_asm,
+        extraInitAsm = [
+            ...extraInitAsm,
             0xa9, 0x02, // lda #$02
             0x8d, 0x06, 0x06, // sta $0606
         ]
     }
 
     if (opts.quick_start) {
-        extra_asm = [
-            ...extra_asm,
+        extraInitAsm = [
+            ...extraInitAsm,
             0xa9, 0x01, // lda #$01
             0x8d, 0x03, 0x06, // sta $0603
             0xa9, 0x14, // lda #20
@@ -749,8 +767,8 @@ function randomize(rom, rng, opts) {
         ]
     }
 
-    extra_asm = [
-        ...extra_asm,
+    extraInitAsm = [
+        ...extraInitAsm,
         0xa9, teleByte1, // lda #$e0 (max)
         0x8d, 0x00, 0x06, // sta $0600
         0xa9, teleByte2, // lda #$07 (max)
@@ -758,13 +776,12 @@ function randomize(rom, rng, opts) {
         0x4c, 0xb2, 0xde // jmp $deb2
     ];
 
-    splice(rom, conv(0xf, 0x1e8a), 0x20, 0x00, 0xbf); // jsr $bf00, 6:3f00
-    splice(rom, conv(6, 0x3f00), ...extra_asm);
+    let extraInitAddr = addToEob(6, extraInitAsm);
+    splice(rom, conv(0xf, 0x1e8a), 0x20, ...litEnd(extraInitAddr)); // jsr extraInitAddr
 
     // custom ocarina code
     rom[conv(6, 0x2fa2)] = 0xb8; // jmp $afb8 - skip checking if the next selected place not visited
-    splice(rom, conv(6, 0x3073), 0x4c, 0x80, 0xbf); // jmp $bf80
-    splice(rom, conv(6, 0x3f80), ...[
+    let customOcarinaAddr = addToEob(6, [
         0xa5, 0xf0, // lda $f0
         0x18, // clc
         0x69, 0x05, // adc #$05
@@ -774,7 +791,8 @@ function randomize(rom, rng, opts) {
         0xa5, 0xf0, // lda $f0
         0x0a, // asl a
         0x4c, 0x7f, 0xb0 // jmp $b07f (tele'ing to a room)
-    ]);
+    ])
+    splice(rom, conv(6, 0x3073), 0x4c, ...litEnd(customOcarinaAddr)); // jmp customOcarinaAddr
 
     // 1 mp cane
     if (opts.oneMPcane)
@@ -782,13 +800,13 @@ function randomize(rom, rng, opts) {
 
     // up, A, up, A, down, A, down, A, left, B, left, B, right, B, right, B
     if (opts.debugCombo) {
-        splice(rom, conv(0xf, 0x3344), 0x20, 0x00, 0xbc); // jsr $bc00
         rom[conv(0xf, 0x2ce6)] = 0x00;
         rom[conv(0xf, 0x2cea)] = 0xf0; // beq
-        splice(rom, conv(6, 0x3c00), ...[
+        let debugFuncAddr = addToEob(6, [
             0x20, 0x94, 0x9d, // jsr $9d94
             0x4c, 0xd5, 0xec, // jmp $ecd5
-        ]);
+        ])
+        splice(rom, conv(0xf, 0x3344), 0x20, ...litEnd(debugFuncAddr)); // jsr debugFuncAddr
     }
 
     // 0 mp ocarina
