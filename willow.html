@@ -67,7 +67,56 @@
           </div>
         </div>
 
-        <div class="field">
+        <div class="tabs is-centered">
+          <ul>
+            <li v-bind:class="isTabSelected('logic')" v-on:click="selectTab('logic')">
+              <a href="#">Logic</a>
+            </li>
+            <li v-bind:class="isTabSelected('modifiers')" v-on:click="selectTab('modifiers')">
+              <a href="#">Modifiers</a>
+            </li>
+            <li v-bind:class="isTabSelected('patches')" v-on:click="selectTab('patches')">
+              <a href="#">Patches</a>
+            </li>
+            <li v-bind:class="isTabSelected('misc')" v-on:click="selectTab('misc')">
+              <a href="#">Misc</a>
+            </li>
+          </ul>
+        </div>
+
+        <div v-show="tab==='logic'">
+          <div class="field">
+            <label class="label">Start with Ocarina</label>
+            <div class="control">
+                <input type="checkbox" v-model="ocarina_start">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Ocarina start locations</label>
+            <div class="control">
+                <input type="checkbox" v-model="ocarina_nelwyn"> Nelwyn
+            </div>
+            <div class="control">
+              <input type="checkbox" v-model="ocarina_dew"> Dew
+            </div>
+            <div class="control">
+              <input type="checkbox" v-model="ocarina_po"> Po's house
+            </div>
+            <div class="control">
+              <input type="checkbox" v-model="ocarina_bar"> Bar
+            </div>
+            <div class="control">
+              <input type="checkbox" v-model="ocarina_tir_asleen"> Tir Asleen
+            </div>
+            <div class="control">
+              <input type="checkbox" v-model="ocarina_nockmaar"> Nockmaar
+            </div>
+          </div>
+        </div>
+
+        <div v-show="tab==='modifiers'">
+          <div class="field">
             <label class="label">Exp requirement multiplier</label>
             <div class="control">
                 <label class="radio">
@@ -87,90 +136,66 @@
                   100%
                 </label>
             </div>
+          </div>
+
+          <div class="field">
+            <label class="label">0 MP Ocarina</label>
+            <div class="control">
+                <input type="checkbox" v-model="no_mp_ocarina">
+            </div>
+          </div>
         </div>
 
-        <div class="field">
+        <div v-show="tab==='patches'">
+          <div class="field">
             <label class="label">No Flash</label>
             <div class="control">
                 <input type="checkbox" v-model="no_flash">
             </div>
-        </div>
+          </div>
 
-        <div class="field">
+          <div class="field">
             <label class="label">Fast Text</label>
             <div class="control">
                 <input type="checkbox" v-model="fast_text">
             </div>
-        </div>
+          </div>
 
-        <div class="field">
+          <div class="field">
             <label class="label">Fast Movement</label>
             <div class="control">
                 <input type="checkbox" v-model="fast_movement">
             </div>
-        </div>
+          </div>
 
-        <div class="field">
-            <label class="label">Start with Ocarina</label>
+          <div class="field">
+            <label class="label">Patch wall clip</label>
             <div class="control">
-                <input type="checkbox" v-model="ocarina_start">
+                <input type="checkbox" v-model="patch_wall_clip">
             </div>
-        </div>
-
-        <div class="field">
-          <label class="label">Ocarina start locations</label>
-          <div class="control">
-              <input type="checkbox" v-model="ocarina_nelwyn"> Nelwyn
-          </div>
-          <div class="control">
-            <input type="checkbox" v-model="ocarina_dew"> Dew
-          </div>
-          <div class="control">
-            <input type="checkbox" v-model="ocarina_po"> Po's house
-          </div>
-          <div class="control">
-            <input type="checkbox" v-model="ocarina_bar"> Bar
-          </div>
-          <div class="control">
-            <input type="checkbox" v-model="ocarina_tir_asleen"> Tir Asleen
-          </div>
-          <div class="control">
-            <input type="checkbox" v-model="ocarina_nockmaar"> Nockmaar
-          </div>
-      </div>
-
-        <div class="field">
-          <label class="label">Checks heal HP and MP</label>
-          <div class="control">
-              <input type="checkbox" v-model="healing_checks">
           </div>
         </div>
 
-        <div class="field">
-          <label class="label">0 MP Ocarina</label>
-          <div class="control">
-              <input type="checkbox" v-model="no_mp_ocarina">
+        <div v-show="tab==='misc'">
+          <div class="field">
+            <label class="label">Checks heal HP and MP</label>
+            <div class="control">
+                <input type="checkbox" v-model="healing_checks">
+            </div>
           </div>
-        </div>
-
-        <div class="field">
-          <label class="label">Quick start (long sword + 20mp)</label>
-          <div class="control">
-              <input type="checkbox" v-model="quick_start">
+  
+          <div class="field">
+            <label class="label">Quick start (long sword + 20mp)</label>
+            <div class="control">
+                <input type="checkbox" v-model="quick_start">
+            </div>
           </div>
-        </div>
-
-        <div class="field">
-          <label class="label">Patch wall clip</label>
-          <div class="control">
-              <input type="checkbox" v-model="patch_wall_clip">
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="label">OHKO</label>
-          <div class="control">
-              <input type="checkbox" v-model="ohko">
+  
+          <div class="field">
+            <label class="label">OHKO</label>
+            <div class="control">
+                <input type="checkbox" v-model="ohko">
+            </div>
           </div>
         </div>
 
@@ -274,6 +299,7 @@
           data_showing: null,
           romType: 'US',
           seed: "",
+          tab: 'logic',
 
           exp_multiplier: "1",
           no_flash: true,
@@ -428,6 +454,16 @@
 
           orderedLocItems: function(loc_items) {
             return loc_items.sort((a, b) => (a[0] > b[1]) ? 1: -1)
+          },
+
+          isTabSelected: function(tab) {
+            if (this.tab === tab)
+              return 'is-active';
+            return ''
+          },
+
+          selectTab: function(tab) {
+            this.tab = tab;
           }
         },
         computed: {
