@@ -223,6 +223,13 @@
                 <input type="checkbox" v-model="patch_wall_clip">
             </div>
           </div>
+
+          <div class="field">
+            <label class="label">Retain items on death</label>
+            <div class="control">
+                <input type="checkbox" v-model="keep_death_items">
+            </div>
+          </div>
         </div>
 
         <div v-show="tab==='misc'">
@@ -381,6 +388,7 @@
           patch_wall_clip: true,
           ohko: false,
           debugCombo: false,
+          keep_death_items: true,
 
           nice_names: {
             GF_UPGRADED_WING_SWORD: 'Upgraded Wing Sword',

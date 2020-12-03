@@ -60,39 +60,30 @@ let litEnd = function(word) {
 let sym = {
     setGlobalFlag: 0xc460,
     update_wInternalPalettesFromSpecA: 0xc6b2,
-    setChrPalMusForRoom: 0x9dd9,
-    wLastCheckpoint: 0x4f8,
+    getNextABitsFrom6bitStruct: 0xb6d8,
+
     magicMPReqs: 0x8189,
+    setChrPalMusForRoom: 0x9dd9,
+    passwordSavedBits: 0xb91c,
+
+    wLastCheckpoint: 0x4f8,
     wRoomX: 0x42,
     wRoomY: 0x43,
 }
 
 let aMode = {
     abs: 0,
-    absY: 1,
-    imm: 2,
-    zpg: 3,
+    absX: 1,
+    absY: 2,
+    imm: 3,
+    zpg: 4,
 }
 
-let jsr = function(addr) {
-    return [0x20, ...litEnd(addr)];
+let bcs = function(addr) {
+    return [0xb0, addr];
 }
-let pha = [0x48];
-let jmp = function(addr) {
-    return [0x4c, ...litEnd(addr)];
-}
-let rts = [0x60];
-let sta = function(addr, mode) {
-    if (mode === aMode.abs)
-        return [0x8d, ...litEnd(addr)];
-}
-let lda = function(addr, mode) {
-    if (mode === aMode.absY)
-        return [0xb9, ...litEnd(addr)];
-    if (mode === aMode.zpg)
-        return [0xa5, addr];
-    if (mode === aMode.imm)
-        return [0xa9, addr];
+let bne = function(addr) {
+    return [0xd0, addr];
 }
 let cmp = function(addr, mode) {
     if (mode === aMode.imm)
@@ -100,9 +91,29 @@ let cmp = function(addr, mode) {
     if (mode === aMode.abs)
         return [0xcd, ...litEnd(addr)];
 }
-let bne = function(addr) {
-    return [0xd0, addr];
+let jmp = function(addr) {
+    return [0x4c, ...litEnd(addr)];
 }
+let jsr = function(addr) {
+    return [0x20, ...litEnd(addr)];
+}
+let lda = function(addr, mode) {
+    if (mode === aMode.absX)
+        return [0xbd, ...litEnd(addr)];
+    if (mode === aMode.absY)
+        return [0xb9, ...litEnd(addr)];
+    if (mode === aMode.zpg)
+        return [0xa5, addr];
+    if (mode === aMode.imm)
+        return [0xa9, addr];
+}
+let pha = [0x48];
+let rts = [0x60];
+let sta = function(addr, mode) {
+    if (mode === aMode.abs)
+        return [0x8d, ...litEnd(addr)];
+}
+
 
 let globalFlags = {
     GF_UPGRADED_WING_SWORD: 0x03,
@@ -963,6 +974,22 @@ function randomize(rom, rng, opts) {
     // ohko
     if (opts.ohko)
         splice(rom, conv(0xf, 0x3452), 0x4c, 0x60, 0xf4); // jmp $f460
+
+    // keep death items
+    if (opts.keep_death_items) {
+        let dontOverrideItemsOnDeathAddr = addToEob(6, [
+            ...lda(0x08, aMode.zpg),
+            ...cmp(0x09, aMode.imm),
+            ...bcs(0x09),
+            ...lda(sym.passwordSavedBits, aMode.absX),
+            ...jsr(sym.getNextABitsFrom6bitStruct),
+            ...jmp(0xb696),
+            ...lda(sym.passwordSavedBits, aMode.absX),
+            ...jsr(sym.getNextABitsFrom6bitStruct),
+            ...jmp(0xb692),
+        ]);
+        splice(rom, conv(6, 0x368f), ...jmp(dontOverrideItemsOnDeathAddr));
+    }
 
     // dont remove crest item
     rom[conv(1, 0x2ee8)] = 0xff;
