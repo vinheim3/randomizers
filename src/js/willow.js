@@ -59,6 +59,8 @@ let litEnd = function(word) {
 
 let sym = {
     setGlobalFlag: 0xc460,
+    update_wInternalPalettesFromSpecA: 0xc6b2,
+    setChrPalMusForRoom: 0x9dd9,
     wLastCheckpoint: 0x4f8,
     magicMPReqs: 0x8189,
     wRoomX: 0x42,
@@ -542,34 +544,37 @@ let startingLocData = {
         node: 'starting_nelwyn',
         y: 0x1a,
         x: 0x0e,
-        chrBank: 0x04,
+        mus: 0x04,
     },
     dew: {
         node: 'starting_dew',
         y: 0x13,
         x: 0x0f,
-        chrBank: 0x04,
+        mus: 0x04,
     },
     posHouse: {
         node: 'starting_po',
         y: 0x13,
         x: 0x03,
+        mus: 0x00,
     },
     bar: {
         node: 'starting_bar',
         y: 0x0a,
         x: 0x09,
-        chrBank: 0x00,
+        mus: 0x00,
     },
     tirAsleen: {
         node: 'starting_tirAsleen',
         y: 0x0f,
         x: 0x19,
+        mus: 0x04,
     },
     nockmaar: {
         node: 'starting_nockmaar',
         y: 0x02,
         x: 0x18,
+        mus: 0x00,
     },
 }
 
@@ -925,8 +930,15 @@ function randomize(rom, rng, opts) {
     if (opts.starting_loc !== 'nelwyn') {
         rom[conv(0xf, 0x1eb3)] = startingLocData[opts.starting_loc].y;
         rom[conv(0xf, 0x1eb7)] = startingLocData[opts.starting_loc].x;
-        // todo: finish chr banks, also get palettes and music
-        //rom[conv(0xf, 0x1edd)] = startingLocData[opts.starting_loc].chrBank;
+        rom[conv(0xf, 0x1ea0)] = startingLocData[opts.starting_loc].mus;
+        let initChrPalMusAddr = addToEob(6, [
+            ...jsr(sym.update_wInternalPalettesFromSpecA),
+            ...jmp(sym.setChrPalMusForRoom),
+        ]);
+        splice(rom, conv(0xf, 0x1eef), ...jsr(initChrPalMusAddr));
+        // move sorsha guard
+        rom[conv(5, 0x0cad)] = 0xd0;
+
     }
 
     // proper checkpoint control
