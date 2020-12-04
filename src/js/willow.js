@@ -991,6 +991,9 @@ function randomize(rom, rng, opts) {
         splice(rom, conv(6, 0x368f), ...jmp(dontOverrideItemsOnDeathAddr));
     }
 
+    // healing fin level
+    rom[conv(6, 0x30d8)] = (+opts.fin_level)-1;
+
     // dont remove crest item
     rom[conv(1, 0x2ee8)] = 0xff;
 
