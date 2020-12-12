@@ -408,13 +408,13 @@ let slots = [
         name: 'Daikini handcuffed guy',
         reqs: ['daikini', 'GF_HANDCUFFS_KEY_ITEM'],
         textAddress: 0x16bd, // 36
-        globalFlagReplacements: [conv(5, 0x1f59)],
+        globalFlagReplacements: [conv(5, 0x1f59)], // change item that hides handcuffed guy
     },
     { // GF_WAKKA_ITEM - replaced flags
         name: 'Daikini wakka seed',
         reqs: ['daikini', 'GF_NECKLACE_ITEM'],
         textAddress: 0x1f80, // 43
-        globalFlagReplacements: [conv(5, 0x1f1c)],
+        globalFlagReplacements: [conv(5, 0x1f1c)], // change item that hides squirrel
     },
     { // GF_FLUTE_ITEM
         name: 'Lake Bridge',
@@ -468,7 +468,7 @@ let slots = [
         name: 'Towers crest',
         reqs: ['muzh', 'GF_RED_CRYSTAL_ITEM'],
         textAddress: 0x2644, // 4a
-        globalFlagReplacements: [],
+        globalFlagReplacements: [conv(6, 0x257a)],
     },
     { // GF_SPECTER_MAGIC
         name: 'Mountains top-left',
@@ -761,7 +761,7 @@ function randomize(rom, rng, opts) {
     splice(rom, conv(6, 0x2559), 2, globalFlags.GF_DRAGON_SWORD, 0x3a, globalFlags.GF_SCALE_ITEM, 0x6a, 0x6f); // 0d
     splice(rom, conv(6, 0x2579), 2, globalFlags.GF_CREST_ITEM, 0x72, globalFlags.GF_RED_CRYSTAL_ITEM, 0x4a, 0x46); // 16
     splice(rom, conv(6, 0x2583), 1, globalFlags.GF_HERBS_ITEM, 0x1b, 0x2a); // 17
-    splice(rom, conv(6, 0x259b), 1, globalFlags.GF_NECKLACE_ITEM, 0x38, 0x37); // 1d
+    splice(rom, conv(6, 0x259b), 1, globalFlags.GF_NECKLACE_ITEM, 0x38, 0x37); // 1d - bar
     splice(rom, conv(6, 0x25a3), 1, globalFlags.GF_THUNDER_MAGIC, 0x4c, 0x4b); // 1e
     
     // mutate based on placement
