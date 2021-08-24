@@ -34,11 +34,11 @@
         methods: {},
         computed: {
             slength: function() {
-                if (this.sentence === "") return 0;
                 let words = this.sentence.split(' ');
                 let total = 0;
                 let doneFirst = false;
                 for (let word of words) {
+                    if (word === "") continue;
                     let i = 0;
                     if (doneFirst) total += 3;
                     while (i < word.length) {
