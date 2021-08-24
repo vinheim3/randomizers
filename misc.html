@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Misc</title>
+    <link rel="stylesheet" href="bulma.min.css">
+    <script src="fontAwesome_all.js"></script>
+    <!--script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script-->
+    <script src="vue_2_6_12.js"></script>
+  </head>
+  <body>
+    <section class="section" id="app">
+      <div class="container box">
+        <h1 class="title">
+          Misc
+        </h1>
+
+        <div class="field">
+          <label class="label">Sentence length: <span>{{ slength }} of 144</span></label>
+          <div class="control">
+            <input class="input" type="text" placeholder="Enter sentence" v-model="sentence">
+          </div>
+        </div>
+
+      </div>
+    </section>
+    <script>
+      let app = new Vue({
+        el: '#app',
+        data: {
+            sentence: '',
+        },
+
+        methods: {},
+        computed: {
+            slength: function() {
+                if (this.sentence === "") return 0;
+                let words = this.sentence.split(' ');
+                let total = 0;
+                let doneFirst = false;
+                for (let word of words) {
+                    let i = 0;
+                    if (doneFirst) total += 3;
+                    while (i < word.length) {
+                        if (word.substring(i, i+6) === '<name>') {
+                            i += 6;
+                            total += 5*5;
+                        } else {
+                            let letter = word[i++];
+                            if ("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".indexOf(letter) !== -1) {
+                                if ("1ITt".indexOf(letter) !== -1) total += 4;
+                                else if ("il".indexOf(letter) !== -1) total += 2;
+                                else total += 5;
+                            } else {
+                                if ("!".indexOf(letter) !== -1) total += 2;
+                                else if ('"'.indexOf(letter) !== -1) total += 6;
+                                else if (",.';:".indexOf(letter) !== -1) total += 3;
+                                else if ("èó".indexOf(letter) !== -1) total += 5;
+                                else total += 8;
+                            }
+                        }
+                    }
+                    doneFirst = true;
+                }
+                return total;
+            }
+        }
+      })
+    </script>
+  </body>
+</html>
