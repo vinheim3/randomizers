@@ -56,9 +56,11 @@
                                 else total += 5;
                             } else {
                                 if ("!".indexOf(letter) !== -1) total += 2;
-                                else if ('"'.indexOf(letter) !== -1) total += 6;
                                 else if (",.';:".indexOf(letter) !== -1) total += 3;
-                                else if ("èó".indexOf(letter) !== -1) total += 5;
+                                else if ("()".indexOf(letter) !== -1) total += 4;
+                                else if ("èóé".indexOf(letter) !== -1) total += 5;
+                                else if ('"-+<>=/*'.indexOf(letter) !== -1) total += 6;
+                                else if ('&'.indexOf(letter) !== -1) total += 7;
                                 else total += 8;
                             }
                         }
