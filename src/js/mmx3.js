@@ -93,6 +93,7 @@ function randomize(rom, rng, opts) {
     */
 
     let start;
+    let isNormal = opts.romType === 'normal';
 
     const ENT_RIDE_ARMOUR_HOLDER = [MT_ENEMY, ENEMYID_RIDE_ARMOUR_HOLDER];
     const ENT_CAPSULE = [MT_ENEMY, ENEMYID_CAPSULE];
@@ -367,9 +368,10 @@ function randomize(rom, rng, opts) {
         Enemy_sizeof: 0x40,
         wEnemyEntities: 0xd18,
     }, {
-        0x03: opts.romType === 'normal' ? 0xfa74 : 0xfa79,
+        0x03: isNormal ? 0xfa74 : 0xfa79,
         0x05: 0xfbee,
         0x13: 0xfa6e,
+        0x4a: 0xc0a6,
     });
 
     // qol - skip intro stage (by pianohombre)
@@ -400,9 +402,11 @@ function randomize(rom, rng, opts) {
     }
 
     // Can use ride armour even if no chimera
-    m.addAsm(3, 0xd75f, `
-        and #$0f.b
-    `);
+    if (isNormal) {
+        m.addAsm(3, 0xd75f, `
+            and #$0f.b
+        `);
+    }
 
     // Start on the 1st available ride armour
     m.addAsm(3, 0xd879, `
@@ -533,7 +537,8 @@ function randomize(rom, rng, opts) {
     `);
 
     // Prevent additional texts due to chip descripts/reqs not filled
-    rom[conv(5, 0xc8ed)] = 0x80; // bra
+    if (isNormal)
+        rom[conv(5, 0xc8ed)] = 0x80; // bra
 
     // Prevent Dr. Light from being drawn
     rom[conv(5, 0xc89d)] = 0x80 // bra
@@ -557,7 +562,7 @@ function randomize(rom, rng, opts) {
         cmp #$ff.b
     `);
     // various hooks to use subtype to determine item, rather than stage
-    m.addAsm(0x13, 0xc031, `
+    m.addAsm(0x13, isNormal ? 0xc031 : 0xc034, `
         jsr ConvertNewCapsuleParamToCapsuleItemGivingEntityParam.w
         tay
         nop
@@ -566,15 +571,31 @@ function randomize(rom, rng, opts) {
     m.addAsm(0x13, 0xc37d, `
         jsr ConvertNewCapsuleParamToCapsuleItemGivingEntityParam.w
     `);
-    m.addAsm(0x13, 0xc3b1, `
-        jsr ConvertNewCapsuleParamToCapsuleItemGivingEntityParam.w
-    `);
+    if (isNormal) {
+        m.addAsm(0x13, 0xc3b1, `
+            jsr ConvertNewCapsuleParamToCapsuleItemGivingEntityParam.w
+        `);
+    }
     m.addAsm(0x13, 0xc510, `
         jsr ConvertNewCapsuleParamToCapsuleItemGivingEntityParam.w
     `);
-    m.addAsm(0x13, 0xc54b, `
-        jsr ConvertNewCapsuleParamToCapsuleItemGivingEntityParam.w
-    `);
+    if (isNormal) {
+        m.addAsm(0x13, 0xc54b, `
+            jsr ConvertNewCapsuleParamToCapsuleItemGivingEntityParam.w
+        `);
+    } else {
+        m.addAsm(0x4a, 0x92da, `
+            jsr FarConvertNewCapsuleParamToCapsuleItemGivingEntityParam.l
+            nop
+            nop
+        `);
+        m.addAsm(0x13, null, `
+        FarConvertNewCapsuleParamToCapsuleItemGivingEntityParam:
+            jsr ConvertNewCapsuleParamToCapsuleItemGivingEntityParam.w
+            and #$00ff.w
+            rtl
+        `);
+    }
     m.addAsm(0x13, 0xc5c0, `
         jsr ConvertNewCapsuleParamToCapsuleItemGivingEntityParam.w
     `);
@@ -624,19 +645,19 @@ function randomize(rom, rng, opts) {
     `);
 
     // Make capsule tile offset not fixed
-    m.addAsm(0x13, 0xc075, `
+    m.addAsm(0x13, isNormal ? 0xc075 : 0xc06e, `
         jsr AdjustCapsuleBaseTileIdx.w
         nop
     `);
 
     // Make capsule tile attr not fixed, except for setting max obj priority
-    m.addAsm(0x13, 0xc07b, `
+    m.addAsm(0x13, isNormal ? 0xc07b : 0xc074, `
         jsr SetCapsuleNonFlipForcedAttrs.w
         nop
     `);
 
     // Adjust capsule to be level with the floor
-    m.addAsm(0x13, 0xc09e, `
+    m.addAsm(0x13, isNormal ? 0xc09e : 0xc097, `
         lda Enemy_y.b
         sec
         sbc #$0018.w
