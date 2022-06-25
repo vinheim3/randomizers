@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Mega Man X3 Randomizer</title>
+    <link rel="stylesheet" href="bulma.min.css">
+    <script src="fontAwesome_all.js"></script>
+    <!--script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script-->
+    <script src="vue_2_6_12.js"></script>
+    <script src="seedrandom.js"></script>
+    <script src="src/js/asm65816.js"></script>
+    <script src="src/js/mmx3.js"></script>
+    <script>
+      var crc32=function(r){for(var a,o=[],c=0;c<256;c++){a=c;for(var f=0;f<8;f++)a=1&a?3988292384^a>>>1:a>>>1;o[c]=a}for(var n=-1,t=0;t<r.length;t++)n=n>>>8^o[255&(n^r.charCodeAt(t))];return(-1^n)>>>0};
+    </script>
+    <style>
+      .btn-margin {
+          margin-top: 5px;
+      }
+      .subtitle {
+          margin-top: 20px;
+          margin-bottom: 2px;
+      }
+      .tr-green {
+          background-color: lawngreen;
+      }
+      .tr-yellow {
+          background-color: yellow;
+      }
+      /* html {
+        background-image: url('ufouriaBG.jpg');
+      } */
+    </style>
+  </head>
+  <body>
+    <section class="section" id="app">
+      <div class="container box">
+        <p><a href="index.html">back</a></p>
+
+        <h1 class="title">
+          Mega Man X3 Randomizer
+        </h1>
+
+        <div class="file">
+          <label class="file-label">
+            <input class="file-input" type="file" name="rom" id="rom" v-on:change="fileChange()" onclick="this.value=null">
+            <span class="file-cta">
+              <span class="file-icon">
+                <i class="fas fa-upload"></i>
+              </span>
+              <span class="file-label">
+                Upload an un-headered Mega Man X3 regular or Zero Mod ROM
+              </span>
+            </span>
+          </label>
+        </div>
+
+        <div class="field">
+          <label class="label">Seed</label>
+          <div class="control">
+            <input class="input" type="text" v-model="seed" style="width:30%">
+          </div>
+        </div>
+
+        <div>
+          <span v-if="correctFileCRCcheck===true" style="color:green">
+            Valid ROM
+          </span>
+          <span v-if="correctFileCRCcheck===false" style="color:red">
+            Invalid ROM
+          </span>
+        </div>
+
+        <hr/>
+
+        <div class="tabs is-centered">
+          <ul>
+            <li v-bind:class="isTabSelected('options')" v-on:click="selectTab('options')">
+              <a href="#">Options</a>
+            </li>
+          </ul>
+        </div>
+
+        <div v-show="tab==='options'">
+          <div class="field">
+            <label class="label">Skip intro stage</label>
+            <div class="control">
+              <input type="checkbox" v-model="skip_intro">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Take 0 damage in most cases (beta testing)</label>
+            <div class="control">
+              <input type="checkbox" v-model="zero_damage">
+            </div>
+          </div>
+        </div>
+
+        <hr/>
+
+        <div class="btn-margin">
+          <button class="button" :disabled="correctFileCRCcheck!==true" v-on:click="randomizeRom()">Randomize</button>
+        </div>
+
+        <div class="btn-margin">
+          <a class="button" :disabled="randomized===false" :download="fname" :href="createBlobURL">Download Randomized ROM</a>
+          <button class="button" :disabled="randomized===false" v-on:click="toggleSpoilers()">
+            <span v-if="showing_spoilers">Hide Spoiler Log</span>
+            <span v-if="!showing_spoilers">Show Spoiler Log</span>
+          </button>
+        </div>
+
+        <div class="btn-margin">
+          <div v-if="showing_spoilers">
+            <table class="table">
+            <thead>
+                <tr>
+                <th>Location</th>
+                <th>Item</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(slot, idx) in orderedSlots">
+                <td>{{ slot.slot.name }}</td>
+                <td>{{ slot.item.name }}</td>
+                </tr>
+            </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+    <script>
+      let app = new Vue({
+        el: '#app',
+        data: {
+          correctFileCRCcheck: null,
+          randomized: null,
+          newSlots: [],
+          randomized_rom: null,
+          showing_spoilers: false,
+          romType: 'normal',
+          seed: "",
+          tab: "options",
+
+          skip_intro: false,
+          zero_damage: false,
+        },
+        methods: {
+          fileChange: function() {
+            app.correctFileCRCcheck = null;
+
+            const selectedFile = document.getElementById('rom').files[0];
+            let reader = new FileReader();
+
+            // crc check
+            reader.onload = function() {
+              let crcCheck = crc32(reader.result);
+              if (crcCheck === 0xfa0fe671) {
+                app.correctFileCRCcheck = true;
+              } else if (crcCheck === 0x7afec006) {
+                app.correctFileCRCcheck = true;
+                app.romType = 'zeromod';
+              } else {
+                app.correctFileCRCcheck = false;
+              }
+              reader.abort();
+            };
+            reader.readAsBinaryString(selectedFile);
+          },
+
+          randomizeRom: function() {
+            // use seed if provided, or gen one
+            let myrng;
+            if (app.seed === '') {
+              app.seed = +(new Date()); 
+            }
+            myrng = new Math.seedrandom(app.seed);
+
+            const selectedFile = document.getElementById('rom').files[0];
+            let reader = new FileReader();
+            app.randomized = false;
+            app.showing_spoilers = false;
+
+            // file processing
+            reader.onload = function() {
+              let view = new Uint8Array(reader.result);
+              let return_val = randomize(view, myrng, {
+                romType: app.romType,
+                skip_intro: app.skip_intro,
+                zero_damage: app.zero_damage,
+              });
+
+              app.newSlots = return_val[0];
+              app.randomized_rom = return_val[1];
+              app.randomized = true;
+
+              reader.abort();
+            }
+            reader.readAsArrayBuffer(selectedFile);
+          },
+
+          toggleSpoilers: function() {
+            this.showing_spoilers = !this.showing_spoilers;
+          },
+
+        //   getRowClass: function(loc_item) {
+        //     if (loc_item[1].includes('Key'))
+        //       return 'tr-green';
+        //     if (loc_item[1] === 'freeon' || loc_item[1] === 'suction' || loc_item[1] === 'gil')
+        //       return 'tr-yellow';
+        //     return '';
+        //   },
+          isTabSelected: function(tab) {
+            if (this.tab === tab)
+              return 'is-active';
+            return ''
+          },
+
+          selectTab: function(tab) {
+            this.tab = tab;
+          }
+        },
+        computed: {
+          createBlobURL: function() {
+            if (!this.randomized) return '';
+            let blob = new Blob([app.randomized_rom], {
+              type: 'application/octet-stream'
+            });
+            return window.URL.createObjectURL(blob);
+          },
+
+          fname: function() {
+            let dt = new Date();
+            return `mmx3-${dt.toJSON()}.sfc`;
+          },
+
+          orderedSlots: function() {
+            return this.newSlots.sort((a, b) => a.slot.name < b.slot.name ? -1 : 1);
+          }
+        }
+      })
+    </script>
+  </body>
+</html>
