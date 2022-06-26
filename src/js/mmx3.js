@@ -485,9 +485,15 @@ function randomize(rom, rng, opts) {
         clc
         adc #Enemy_sizeof.w
         tcd
+        cmp #$10d8.w
         sep #$20.b
+        beq _noCapsule
 
         bra _nextEntity
+
+    _noCapsule:
+        lda $0008.w
+        bra _setTextIdx
 
     _exitLoop:
         lda Enemy_subType.b
@@ -528,6 +534,8 @@ function randomize(rom, rng, opts) {
 
     _setCapsuleTextIdx:
         tya
+
+    _setTextIdx:
         plx
         sta $0006.w, X
 
