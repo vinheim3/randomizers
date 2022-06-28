@@ -340,6 +340,23 @@ function randomize(rom, rng, opts) {
       available_slots.splice(chosen_slot, 1);
     }
 
+    // Prevent volt catfish heart tank having a capsule
+    for (let assignedSlot of newSlots) {
+        if (assignedSlot.slot.name !== "Volt Catfish Heart Tank") continue;
+        if (assignedSlot.item.name.indexOf("Capsule") === -1) break;
+
+        for (let assignedSlot2 of newSlots) {
+            if (assignedSlot2.slot.name === assignedSlot.slot.name) continue;
+            if (assignedSlot2.item.name.indexOf("Capsule") !== -1) continue;
+
+            let temp = assignedSlot.item;
+            assignedSlot.item = assignedSlot2.item;
+            assignedSlot2.item = temp;
+            break;
+        }
+        break;
+    }
+
     /*
     Mutate
     */
