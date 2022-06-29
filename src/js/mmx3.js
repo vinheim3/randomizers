@@ -38,8 +38,43 @@ const ITEMID_RIDE_ARMOUR_ITEM = 0x17;
 
 const ENEMYID_RIDE_ARMOUR_HOLDER = 0x4c;
 const ENEMYID_CAPSULE = 0x4d;
+const ENEMYID_BLIZZARD_BUFFALO = 0x52;
+const ENEMYID_BLAST_HORNET = 0x53;
+const ENEMYID_CRUSH_CRAWFISH = 0x54;
+const ENEMYID_TUNNEL_RHINO = 0x55;
+const ENEMYID_NEON_TIGER = 0x56;
+const ENEMYID_TOXIC_SEAHORSE = 0x57;
+const ENEMYID_VOLT_CATFISH = 0x58;
+const ENEMYID_GRAVITY_BEETLE = 0x59;
 
 const DECOMP_DATA_IDX_RIDE_ARMOUR_ITEM = 0x3b;
+
+const bossData = {
+    'Blast Hornet': {
+        maxHealth: conv(0x39, 0x9dc2),
+    },
+    'Blizzard Buffalo': {
+        maxHealth: conv(0x03, 0xc9cb),
+    },
+    'Gravity Beetle': {
+        maxHealth: conv(0x13, 0xf3c3),
+    },
+    'Toxic Seahorse': {
+        maxHealth: conv(0x13, 0xe612),
+    },
+    'Volt Catfish': {
+        maxHealth: conv(0x13, 0xebc0),
+    },
+    'Crush Crawfish': {
+        maxHealth: conv(0x03, 0xd1b2),
+    },
+    'Tunnel Rhino': {
+        maxHealth: conv(0x3f, 0xe765),
+    },
+    'Neon Tiger': {
+        maxHealth: conv(0x13, 0xde11),
+    },
+}
 
 const findStageEntityData = function(rom, stageIdx, majorType, type) {
     const table = conv(0x3c, 0xce4b);
@@ -175,6 +210,34 @@ function randomize(rom, rng, opts) {
         [0x46, "Hyper chip"],
     ]) {
         replaceText(rom, textIdx, ["You got the", text]);
+    }
+
+    let healthMap = [];
+    // Randomize boss health
+    if (opts.random_boss_hp) {
+        // let healthPool = 8*0x20;
+        // let minHpBoss = '';
+        // let minHp = 0x100;
+        // let minHpIdx = 0;
+        // bosses have 0x10-0x30 HP
+        for (let [bossName, deets] of Object.entries(bossData)) {
+            let healthAddr = deets.maxHealth;
+            if (rom[healthAddr-1] !== 0xc9 || rom[healthAddr] !== 0x20)
+                throw new Error(`Boss ${bossName} health address is wrong`);
+            let health = Math.floor(rng() * 20) + 0x10;
+            rom[healthAddr] = health;
+            // healthPool -= health;
+            // if (health < minHp) {
+            //     minHp = health;
+            //     minHpBoss = bossName;
+            //     minHpIdx = healthMap.length;
+            // }
+            healthMap.push([bossName, health]);
+        }
+        // if (healthPool) {
+        //     rom[bossData[minHpBoss].maxHealth] += healthPool;
+        //     healthMap[minHpIdx][1] = rom[bossData[minHpBoss].maxHealth];
+        // }
     }
 
     /*
@@ -414,6 +477,14 @@ function randomize(rom, rng, opts) {
         `);
         m.addAsm(4, 0xd095, `
             sbc #$00.b
+            nop
+        `);
+    }
+
+    // qol - small enemies spawn with 1hp
+    if (opts.enemies_1hp) {
+        m.addAsm(2, 0xe184, `
+            lda #$01.b
             nop
         `);
     }
@@ -699,5 +770,5 @@ function randomize(rom, rng, opts) {
     writeWord(rom, 0x7fdc, 0x10000-checksum);
     writeWord(rom, 0x7fde, checksum);
 
-    return [newSlots, rom];
+    return [newSlots, healthMap, rom];
 }

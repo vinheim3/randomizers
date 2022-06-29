@@ -75,24 +75,52 @@
 
         <div class="tabs is-centered">
           <ul>
+            <li v-bind:class="isTabSelected('qol')" v-on:click="selectTab('qol')">
+              <a href="#">Quality of Life</a>
+            </li>
+          </ul>
+          <ul>
             <li v-bind:class="isTabSelected('options')" v-on:click="selectTab('options')">
               <a href="#">Options</a>
             </li>
           </ul>
+          <ul>
+            <li v-bind:class="isTabSelected('beta_test')" v-on:click="selectTab('beta_test')">
+              <a href="#">Beta Testing</a>
+            </li>
+          </ul>
         </div>
 
-        <div v-show="tab==='options'">
+        <div v-show="tab==='qol'">
           <div class="field">
-            <label class="label">Skip intro stage</label>
+            <label class="label">Skip Intro Stage</label>
             <div class="control">
               <input type="checkbox" v-model="skip_intro">
             </div>
           </div>
+        </div>
 
+        <div v-show="tab==='options'">
+          <div class="field">
+            <label class="label">Random Boss HP</label>
+            <div class="control">
+              <input type="checkbox" v-model="random_boss_hp">
+            </div>
+          </div>
+        </div>
+
+        <div v-show="tab==='beta_test'">
           <div class="field">
             <label class="label">Take 0 damage in most cases (beta testing)</label>
             <div class="control">
               <input type="checkbox" v-model="zero_damage">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Most enemies spawn with 1hp (beta testing)</label>
+            <div class="control">
+              <input type="checkbox" v-model="enemies_1hp">
             </div>
           </div>
         </div>
@@ -114,18 +142,33 @@
         <div class="btn-margin">
           <div v-if="showing_spoilers">
             <table class="table">
-            <thead>
-                <tr>
-                <th>Location</th>
-                <th>Item</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(slot, idx) in orderedSlots">
-                <td>{{ slot.slot.name }}</td>
-                <td>{{ slot.item.name }}</td>
-                </tr>
-            </tbody>
+              <thead>
+                  <tr>
+                  <th>Location</th>
+                  <th>Item</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr v-for="(slot, idx) in orderedSlots">
+                  <td>{{ slot.slot.name }}</td>
+                  <td>{{ slot.item.name }}</td>
+                  </tr>
+              </tbody>
+            </table>
+
+            <table class="table">
+              <thead>
+                  <tr>
+                  <th>Boss</th>
+                  <th>Health</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr v-for="(assignedHealth, idx) in healthMap">
+                  <td>{{ assignedHealth[0] }}</td>
+                  <td>{{ assignedHealth[1] }}</td>
+                  </tr>
+              </tbody>
             </table>
           </div>
         </div>
@@ -138,14 +181,17 @@
           correctFileCRCcheck: null,
           randomized: null,
           newSlots: [],
+          healthMap: [],
           randomized_rom: null,
           showing_spoilers: false,
           romType: 'normal',
           seed: "",
           tab: "options",
 
-          skip_intro: false,
+          skip_intro: true,
           zero_damage: false,
+          enemies_1hp: false,
+          random_boss_hp: false,
         },
         methods: {
           fileChange: function() {
@@ -186,14 +232,11 @@
             // file processing
             reader.onload = function() {
               let view = new Uint8Array(reader.result);
-              let return_val = randomize(view, myrng, {
-                romType: app.romType,
-                skip_intro: app.skip_intro,
-                zero_damage: app.zero_damage,
-              });
+              let return_val = randomize(view, myrng, app);
 
               app.newSlots = return_val[0];
-              app.randomized_rom = return_val[1];
+              app.healthMap = return_val[1];
+              app.randomized_rom = return_val[2];
               app.randomized = true;
 
               reader.abort();
