@@ -49,30 +49,50 @@ const ENEMYID_GRAVITY_BEETLE = 0x59;
 
 const DECOMP_DATA_IDX_RIDE_ARMOUR_ITEM = 0x3b;
 
+// idxes into a table of $26 weakness vars
+const enemyWeaknesses = {
+    0x12: "Gravity Well / Spinning Blade",
+    0x13: "Parasitic Bomb",
+    0x14: "Ray Splasher / Parasitic Bomb",
+    0x15: "Frost Shield",
+    0x16: "Tornado Fang",
+    0x17: "Triad Thunder",
+    0x18: "Acid Burst",
+    0x19: "Spinning Blade",
+}
+
 const bossData = {
     'Blast Hornet': {
         maxHealth: conv(0x39, 0x9dc2),
+        id: ENEMYID_BLAST_HORNET,
     },
     'Blizzard Buffalo': {
         maxHealth: conv(0x03, 0xc9cb),
+        id: ENEMYID_BLIZZARD_BUFFALO,
     },
     'Gravity Beetle': {
         maxHealth: conv(0x13, 0xf3c3),
+        id: ENEMYID_GRAVITY_BEETLE,
     },
     'Toxic Seahorse': {
         maxHealth: conv(0x13, 0xe612),
+        id: ENEMYID_TOXIC_SEAHORSE,
     },
     'Volt Catfish': {
         maxHealth: conv(0x13, 0xebc0),
+        id: ENEMYID_VOLT_CATFISH,
     },
     'Crush Crawfish': {
         maxHealth: conv(0x03, 0xd1b2),
+        id: ENEMYID_CRUSH_CRAWFISH,
     },
     'Tunnel Rhino': {
         maxHealth: conv(0x3f, 0xe765),
+        id: ENEMYID_TUNNEL_RHINO,
     },
     'Neon Tiger': {
         maxHealth: conv(0x13, 0xde11),
+        id: ENEMYID_NEON_TIGER,
     },
 }
 
@@ -104,6 +124,10 @@ const getDynamicSpriteData = function(rom, stageIdx, dynIdx, entryIdx) {
     const stageOffs = readWord(rom, table+stageIdx*2);
     const dynOffs = readWord(rom, table+stageOffs+dynIdx*2);
     return table+dynOffs+entryIdx*6;
+}
+
+const getEnemyBaseData = function(enemy_idx) {
+    return conv(6, 0xe28e+5*enemy_idx);
 }
 
 const replaceText = function(rom, textIdx, text) {
@@ -212,7 +236,6 @@ function randomize(rom, rng, opts) {
         replaceText(rom, textIdx, ["You got the", text]);
     }
 
-    let healthMap = [];
     // Randomize boss health
     if (opts.random_boss_hp) {
         // let healthPool = 8*0x20;
@@ -232,12 +255,22 @@ function randomize(rom, rng, opts) {
             //     minHpBoss = bossName;
             //     minHpIdx = healthMap.length;
             // }
-            healthMap.push([bossName, health]);
+            bossData[bossName].newHealth = health;
         }
         // if (healthPool) {
         //     rom[bossData[minHpBoss].maxHealth] += healthPool;
         //     healthMap[minHpIdx][1] = rom[bossData[minHpBoss].maxHealth];
         // }
+    }
+
+    // Randomize boss weakness
+    if (opts.random_boss_weakness) {
+        for (let [bossName, deets] of Object.entries(bossData)) {
+            let tableEntry = getEnemyBaseData(deets.id);
+            let weakness = Math.floor(rng() * 8) + 0x12;
+            rom[tableEntry+4] = weakness;
+            bossData[bossName].newWeakness = enemyWeaknesses[weakness];
+        }
     }
 
     /*
@@ -770,5 +803,14 @@ function randomize(rom, rng, opts) {
     writeWord(rom, 0x7fdc, 0x10000-checksum);
     writeWord(rom, 0x7fde, checksum);
 
-    return [newSlots, healthMap, rom];
+    let bossDetails = [];
+    for (let [bossName, deets] of Object.entries(bossData)) {
+        bossDetails.push([bossName, deets.newHealth, deets.newWeakness]);
+    }
+
+    return {
+        newSlots: newSlots,
+        bossDetails: bossDetails,
+        randomized_rom: rom,
+    }
 }

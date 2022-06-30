@@ -107,6 +107,13 @@
               <input type="checkbox" v-model="random_boss_hp">
             </div>
           </div>
+
+          <!-- <div class="field">
+            <label class="label">Random Boss Weakness</label>
+            <div class="control">
+              <input type="checkbox" v-model="random_boss_weakness">
+            </div>
+          </div> -->
         </div>
 
         <div v-show="tab==='beta_test'">
@@ -161,12 +168,14 @@
                   <tr>
                   <th>Boss</th>
                   <th>Health</th>
+                  <th>Weakness</th>
                   </tr>
               </thead>
               <tbody>
-                  <tr v-for="(assignedHealth, idx) in healthMap">
-                  <td>{{ assignedHealth[0] }}</td>
-                  <td>{{ assignedHealth[1] }}</td>
+                  <tr v-for="(newBossEntry, idx) in bossDetails">
+                  <td>{{ newBossEntry[0] }}</td>
+                  <td>{{ newBossEntry[1] }}</td>
+                  <td>{{ newBossEntry[2] }}</td>
                   </tr>
               </tbody>
             </table>
@@ -180,18 +189,20 @@
         data: {
           correctFileCRCcheck: null,
           randomized: null,
-          newSlots: [],
-          healthMap: [],
           randomized_rom: null,
           showing_spoilers: false,
           romType: 'normal',
           seed: "",
           tab: "options",
 
+          newSlots: [],
+          bossDetails: [],
+
           skip_intro: true,
           zero_damage: false,
           enemies_1hp: false,
           random_boss_hp: false,
+          random_boss_weakness: false,
         },
         methods: {
           fileChange: function() {
@@ -234,9 +245,9 @@
               let view = new Uint8Array(reader.result);
               let return_val = randomize(view, myrng, app);
 
-              app.newSlots = return_val[0];
-              app.healthMap = return_val[1];
-              app.randomized_rom = return_val[2];
+              for (let attr of ['newSlots', 'bossDetails', 'randomized_rom']) {
+                app[attr] = return_val[attr];
+              }
               app.randomized = true;
 
               reader.abort();
