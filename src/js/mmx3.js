@@ -61,38 +61,73 @@ const enemyWeaknesses = {
     0x19: "Spinning Blade",
 }
 
+const subweapons = [
+    "Acid Burst",
+    "Parasitic Bomb",
+    "Triad Thunder",
+    "Spinning Blade",
+    "Ray Splasher",
+    "Gravity Well",
+    "Frost Shield",
+    "Tornado Fang",
+];
+
 const bossData = {
     'Blast Hornet': {
         maxHealth: conv(0x39, 0x9dc2),
         id: ENEMYID_BLAST_HORNET,
+        idx: 0,
+        subwepReward: conv(0x39, 0xa14c), // +1 from `sta` to point to `abs` param
+        subwepCheck: conv(0x39, 0x9c86), // +1 from `bit` to point to `abs` param
     },
     'Blizzard Buffalo': {
         maxHealth: conv(0x03, 0xc9cb),
         id: ENEMYID_BLIZZARD_BUFFALO,
+        idx: 1,
+        subwepReward: conv(0x03, 0xcd9d),
+        subwepCheck: conv(0x03, 0xc8a8),
     },
     'Gravity Beetle': {
         maxHealth: conv(0x13, 0xf3c3),
         id: ENEMYID_GRAVITY_BEETLE,
+        idx: 2,
+        subwepReward: conv(0x13, 0xf7c2),
+        subwepCheck: conv(0x13, 0xf280),
     },
     'Toxic Seahorse': {
         maxHealth: conv(0x13, 0xe612),
         id: ENEMYID_TOXIC_SEAHORSE,
+        idx: 3,
+        subwepReward: conv(0x13, 0xe9c8),
+        subwepCheck: conv(0x13, 0xe4d8),
     },
     'Volt Catfish': {
         maxHealth: conv(0x13, 0xebc0),
         id: ENEMYID_VOLT_CATFISH,
+        idx: 4,
+        subwepReward: conv(0x13, 0xf0bf),
+        subwepCheck: conv(0x13, 0xeaac),
     },
     'Crush Crawfish': {
         maxHealth: conv(0x03, 0xd1b2),
         id: ENEMYID_CRUSH_CRAWFISH,
+        idx: 5,
+        subwepReward: conv(0x03, 0xd5b4),
+        subwepCheck: conv(0x03, 0xd089),
     },
     'Tunnel Rhino': {
         maxHealth: conv(0x3f, 0xe765),
         id: ENEMYID_TUNNEL_RHINO,
+        idx: 6,
+        subwepReward: conv(0x3f, 0xeb13),
+        subwepCheck: conv(0x3f, 0xe62a),
     },
     'Neon Tiger': {
         maxHealth: conv(0x13, 0xde11),
         id: ENEMYID_NEON_TIGER,
+        idx: 7,
+        subwepReward: conv(0x13, 0xe3ab),
+        subwepCheck: conv(0x13, 0xdce7),
     },
 }
 
@@ -153,6 +188,23 @@ function randomize(rom, rng, opts) {
 
     let start;
     let isNormal = opts.romType === 'normal';
+
+    let m = new M65816({
+        wStageIdx: 0x1fae,
+        wChipsAndRideArmoursGottenBitfield: 0x1fd7,
+        Enemy_y: 0x08,
+        Enemy_type: 0x0a,
+        Enemy_subType: 0x0b,
+        Enemy_sizeof: 0x40,
+        wEnemyEntities: 0xd18,
+        wBeatenStageIdx: 0xd4f,
+    }, {
+        0x03: isNormal ? 0xfa74 : 0xfa79,
+        0x05: 0xfbee,
+        0x06: isNormal ? 0xfb83 : 0xff78,
+        0x13: 0xfa6e,
+        0x4a: 0xc0a6,
+    });
 
     const ENT_RIDE_ARMOUR_HOLDER = [MT_ENEMY, ENEMYID_RIDE_ARMOUR_HOLDER];
     const ENT_CAPSULE = [MT_ENEMY, ENEMYID_CAPSULE];
@@ -238,29 +290,14 @@ function randomize(rom, rng, opts) {
 
     // Randomize boss health
     if (opts.random_boss_hp) {
-        // let healthPool = 8*0x20;
-        // let minHpBoss = '';
-        // let minHp = 0x100;
-        // let minHpIdx = 0;
-        // bosses have 0x10-0x30 HP
         for (let [bossName, deets] of Object.entries(bossData)) {
             let healthAddr = deets.maxHealth;
             if (rom[healthAddr-1] !== 0xc9 || rom[healthAddr] !== 0x20)
                 throw new Error(`Boss ${bossName} health address is wrong`);
             let health = Math.floor(rng() * 20) + 0x10;
             rom[healthAddr] = health;
-            // healthPool -= health;
-            // if (health < minHp) {
-            //     minHp = health;
-            //     minHpBoss = bossName;
-            //     minHpIdx = healthMap.length;
-            // }
             bossData[bossName].newHealth = health;
         }
-        // if (healthPool) {
-        //     rom[bossData[minHpBoss].maxHealth] += healthPool;
-        //     healthMap[minHpIdx][1] = rom[bossData[minHpBoss].maxHealth];
-        // }
     }
 
     // Randomize boss weakness
@@ -271,6 +308,102 @@ function randomize(rom, rng, opts) {
             rom[tableEntry+4] = weakness;
             bossData[bossName].newWeakness = enemyWeaknesses[weakness];
         }
+    }
+
+    // Randomize boss drops
+    if (opts.random_boss_drop) {
+        let subweaponPool = [0,1,2,3,4,5,6,7];
+        let subwepToStage = {
+            0: 3,
+            1: 0,
+            2: 4,
+            3: 5,
+            4: 7,
+            5: 2,
+            6: 1,
+            7: 6,
+        };
+        for (let [bossName, deets] of Object.entries(bossData)) {
+            if (isNormal) {
+                // Sanity check
+                if (rom[deets.subwepCheck-1] !== 0x2c) // bit abs.w
+                    throw new Error(`Subweapon check failed for ${bossName}`);
+                if (rom[deets.subwepReward-1] !== 0x8d) // sta abs.w
+                    throw new Error(`Subweapon reward failed for ${bossName}`);
+            }
+        }
+
+        // This and the called routine, make sure to properly display the
+        // weapon-giving screen, animations, and actual given weapon
+        if (isNormal) {
+            m.addAsm(0, 0xa67e, `
+                jsr StageRemappedForSubWepRewardAccu16.l
+            `);
+
+            m.addAsm(0, 0xa6a2, `
+                nop
+                nop
+                nop
+            `);
+
+            m.addAsm(0x13, null, `
+            ; A - stage idx in lower byte
+            ; Return new stage idx in X
+            StageRemappedForSubWepRewardAccu16:
+                and #$00ff.w
+                sep #$30.b
+                tax
+                lda StageForSubwepRemapping.w, X
+                sta wBeatenStageIdx.w
+                rep #$30.b
+                tax
+                rtl
+            `);
+
+            m.addAsm(0x06, null, `
+            StageForSubwepRemapping:
+                nop ; stages are idxed from 1
+            `);
+        } else {
+            m.addAsm(0, 0xa69f, `
+                jsr StageRemappedForSubWepRewardAccu16.l
+                nop
+                nop
+            `);
+
+            m.addAsm(0x13, null, `
+            StageRemappedForSubWepRewardAccu16:
+                lda wStageIdx.w
+                tax
+                lda StageForSubwepRemapping.l, X
+                sta wBeatenStageIdx.w
+                rtl
+            `);
+
+            m.addAsm(0x48, 0x975b, `
+            StageForSubwepRemapping:
+            `);
+        }        
+
+        for (let [bossName, deets] of Object.entries(bossData)) {
+            let subwepIdx = Math.floor(rng() * subweaponPool.length);
+            let subwepId = subweaponPool[subwepIdx];
+            subweaponPool.splice(subwepIdx, 1);
+            bossData[bossName].newDrop = subweapons[subwepId];
+
+            if (isNormal) {
+                // Stage->subweapon given
+                rom[conv(0x06, m.bankEnds[0x06]+deets.idx)] = subwepToStage[subwepId];
+                // SubweaponsStatusToAssociatedStage
+                rom[conv(0x06, 0x9c5e+subwepId)] = deets.idx+1;
+                writeWord(rom, deets.subwepReward, 0x1fbc+subwepId*2);
+                writeWord(rom, deets.subwepCheck, 0x1fbc+subwepId*2);
+            } else {
+                // Stage->subweapon given
+                rom[conv(0x48, 0x975c+deets.idx)] = subwepToStage[subwepId]+1;
+            }
+        }
+        m.bankEnds[0x06] += 8;
     }
 
     /*
@@ -471,22 +604,6 @@ function randomize(rom, rng, opts) {
         writeWord(rom, slot.dynamicSpriteEntry+3, item.paletteId);
     }
 
-    let m = new M65816({
-        wStageIdx: 0x1fae,
-        wChipsAndRideArmoursGottenBitfield: 0x1fd7,
-        Func_13_c1b4: conv(0x13, 0xc1b4),
-        Enemy_y: 0x08,
-        Enemy_type: 0x0a,
-        Enemy_subType: 0x0b,
-        Enemy_sizeof: 0x40,
-        wEnemyEntities: 0xd18,
-    }, {
-        0x03: isNormal ? 0xfa74 : 0xfa79,
-        0x05: 0xfbee,
-        0x13: 0xfa6e,
-        0x4a: 0xc0a6,
-    });
-
     // qol - skip intro stage (by pianohombre)
     if (opts.skip_intro) {
         m.addAsm(0, 0x99bd, `
@@ -559,27 +676,6 @@ function randomize(rom, rng, opts) {
         stx $34.b
         rts
     `);
-
-    // qol - remove capsule initial cutscene
-    // prevent player freezing when touching a capsule
-    // m.addAsm(0x13, 0xc173, `
-    //     nop
-    //     nop
-    //     nop
-    //     nop
-    // `);
-    // prevent camera snapping in on capsule (as it requires text to snap back)
-    // unnecessary, as we clear camera snapping data below
-    // m.addAsm(0x13, 0xc19e, `
-    //     bra Func_13_c1b4
-    //     nop
-    // `);
-    // prevent old guy, and text, from spawning
-    // m.addAsm(0x13, 0xc20c, `
-    //     rts
-    //     nop
-    //     nop
-    // `);
 
     // Get the right text idx for Dr Light
     m.addAsm(2, 0xfd02, `
@@ -805,7 +901,7 @@ function randomize(rom, rng, opts) {
 
     let bossDetails = [];
     for (let [bossName, deets] of Object.entries(bossData)) {
-        bossDetails.push([bossName, deets.newHealth, deets.newWeakness]);
+        bossDetails.push([bossName, deets.newHealth, deets.newWeakness, deets.newDrop]);
     }
 
     return {

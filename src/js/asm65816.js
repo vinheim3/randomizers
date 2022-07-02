@@ -59,6 +59,12 @@ class M65816 {
         return tokens;
     }
 
+    toBankAddr(romOffs) {
+        let bank = romOffs >> 15;
+        let romAddr = (romOffs & 0x7fff) + 0x8000;
+        return (bank << 16) | romAddr;
+    }
+
     parseNumber(num) {
         if (num.length === 0) throw new Error('No number to parse');
         let radix = 10;
@@ -79,7 +85,8 @@ class M65816 {
         if (this.labels[num] === undefined) throw new Error(`Could not parse number ${num}`);
         let [blockName, offs] = this.labels[num];
         if (this.asm[blockName] === undefined) throw new Error(`Could not find block with name ${blockName}`);
-        return this.asm[blockName].placement + offs;
+        let romOffs = this.asm[blockName].placement + offs;
+        return this.toBankAddr(romOffs);
     }
 
     getAbs(mnem, tokens, getSize) {
@@ -100,8 +107,8 @@ class M65816 {
 
         let lb = value & 0xff;
         value >>= 8;
-        let mid = (value & 0x7f) + 0x80;
-        return [lb, mid, (value>>7)&0xff];
+        let mid = (value & 0xff);
+        return [lb, mid, value>>8];
     }
 
     getDp(mnem, tokens, getSize) {
@@ -134,7 +141,8 @@ class M65816 {
 
         let dest = tokens[0];
         let destAddr = this.parseNumber(dest);
-        let currOffs = this.asm[this.currBlockName].placement + this.currOffs;
+        let currRomOffs = this.asm[this.currBlockName].placement + this.currOffs;
+        let currOffs = this.toBankAddr(currRomOffs);
         let rel = destAddr - (currOffs + 2);
         if (Math.abs(rel) >= 0x80) throw new Error(`Relative branch for destination, ${dest}, too large: ${hexc(rel)}`);
         return rel >= 0 ? [rel] : [rel + 0x100];
@@ -227,6 +235,10 @@ class M65816 {
             return [0xa5, ...this.getDp('lda', tokens.slice(0,1), getSize)];
         } else if (tokens[tokens.length-1] == 'w') {
             return [0xad, ...this.getAbs('lda', tokens.slice(0,1), getSize)];
+        } else if (tokens[tokens.length-3] == 'w' && tokens[tokens.length-2] == ',' && tokens[tokens.length-1] == 'X') {
+            return [0xbd, ...this.getAbs('lda', tokens.slice(0,1), getSize)];
+        } else if (tokens[tokens.length-3] == 'l' && tokens[tokens.length-2] == ',' && tokens[tokens.length-1] == 'X') {
+            return [0xbf, ...this.getLong('lda', tokens.slice(0,1), getSize)];
         } else {
             throw new Error(`Could not process lda ${tokens}`);
         }
@@ -373,6 +385,10 @@ class M65816 {
         } else {
             throw new Error(`Could not process stx ${tokens}`);
         }
+    }
+
+    tax(tokens, getSize) {
+        return [0xaa];
     }
 
     tay(tokens, getSize) {

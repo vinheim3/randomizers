@@ -114,6 +114,13 @@
               <input type="checkbox" v-model="random_boss_weakness">
             </div>
           </div> -->
+
+          <div class="field">
+            <label class="label">Random Boss Drop</label>
+            <div class="control">
+              <input type="checkbox" v-model="random_boss_drop">
+            </div>
+          </div>
         </div>
 
         <div v-show="tab==='beta_test'">
@@ -169,6 +176,7 @@
                   <th>Boss</th>
                   <th>Health</th>
                   <th>Weakness</th>
+                  <th>Drop</th>
                   </tr>
               </thead>
               <tbody>
@@ -176,6 +184,7 @@
                   <td>{{ newBossEntry[0] }}</td>
                   <td>{{ newBossEntry[1] }}</td>
                   <td>{{ newBossEntry[2] }}</td>
+                  <td>{{ newBossEntry[3] }}</td>
                   </tr>
               </tbody>
             </table>
@@ -203,6 +212,7 @@
           enemies_1hp: false,
           random_boss_hp: false,
           random_boss_weakness: false,
+          random_boss_drop: false,
         },
         methods: {
           fileChange: function() {
