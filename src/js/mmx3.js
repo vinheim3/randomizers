@@ -79,6 +79,7 @@ const bossData = {
         idx: 0,
         subwepReward: conv(0x39, 0xa14c), // +1 from `sta` to point to `abs` param
         subwepCheck: conv(0x39, 0x9c86), // +1 from `bit` to point to `abs` param
+        extraWeakness: [],
     },
     'Blizzard Buffalo': {
         maxHealth: conv(0x03, 0xc9cb),
@@ -86,6 +87,7 @@ const bossData = {
         idx: 1,
         subwepReward: conv(0x03, 0xcd9d),
         subwepCheck: conv(0x03, 0xc8a8),
+        extraWeakness: [conv(0x03, 0xcd30)], // +1 from `lda` to point to `imm` param
     },
     'Gravity Beetle': {
         maxHealth: conv(0x13, 0xf3c3),
@@ -93,6 +95,7 @@ const bossData = {
         idx: 2,
         subwepReward: conv(0x13, 0xf7c2),
         subwepCheck: conv(0x13, 0xf280),
+        extraWeakness: [conv(0x13, 0xf683), conv(0x13, 0xf778)],
     },
     'Toxic Seahorse': {
         maxHealth: conv(0x13, 0xe612),
@@ -100,6 +103,7 @@ const bossData = {
         idx: 3,
         subwepReward: conv(0x13, 0xe9c8),
         subwepCheck: conv(0x13, 0xe4d8),
+        extraWeakness: [conv(0x13, 0xe892)],
     },
     'Volt Catfish': {
         maxHealth: conv(0x13, 0xebc0),
@@ -107,6 +111,7 @@ const bossData = {
         idx: 4,
         subwepReward: conv(0x13, 0xf0bf),
         subwepCheck: conv(0x13, 0xeaac),
+        extraWeakness: [conv(0x13, 0xf045)],
     },
     'Crush Crawfish': {
         maxHealth: conv(0x03, 0xd1b2),
@@ -114,6 +119,7 @@ const bossData = {
         idx: 5,
         subwepReward: conv(0x03, 0xd5b4),
         subwepCheck: conv(0x03, 0xd089),
+        extraWeakness: [],
     },
     'Tunnel Rhino': {
         maxHealth: conv(0x3f, 0xe765),
@@ -121,6 +127,7 @@ const bossData = {
         idx: 6,
         subwepReward: conv(0x3f, 0xeb13),
         subwepCheck: conv(0x3f, 0xe62a),
+        extraWeakness: [conv(0x3f, 0xe9eb), conv(0x3f, 0xeab5)],
     },
     'Neon Tiger': {
         maxHealth: conv(0x13, 0xde11),
@@ -128,6 +135,7 @@ const bossData = {
         idx: 7,
         subwepReward: conv(0x13, 0xe3ab),
         subwepCheck: conv(0x13, 0xdce7),
+        extraWeakness: [conv(0x13, 0xdf3e), conv(0x13, 0xe27d)],
     },
 }
 
@@ -151,7 +159,7 @@ const findStageEntityData = function(rom, stageIdx, majorType, type) {
             if ((rom[start-1] & 0x80) !== 0) break;
         }
     }
-    throw new Error(`Could not find stage entity data ${stageIdx}, ${majorType}, ${type.toString(16)}`);
+    throw new Error(`Could not find stage entity data ${stageIdx}, ${majorType}, ${hexc(type)}`);
 }
 
 const getDynamicSpriteData = function(rom, stageIdx, dynIdx, entryIdx) {
@@ -317,6 +325,11 @@ function randomize(_rom, rng, opts) {
             let tableEntry = getEnemyBaseData(deets.id);
             let weakness = Math.floor(rng() * 8) + 0x12;
             rom[tableEntry+4] = weakness;
+            for (let addr of deets.extraWeakness) {
+                if (rom[addr-1] !== 0xa9)
+                    throw new Error(`Boss weakness is wrong ${hexc(addr)}`);
+                rom[addr] = weakness;
+            }
             bossData[bossName].newWeakness = enemyWeaknesses[weakness];
         }
     }
