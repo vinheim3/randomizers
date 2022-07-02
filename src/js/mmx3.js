@@ -162,7 +162,7 @@ const getDynamicSpriteData = function(rom, stageIdx, dynIdx, entryIdx) {
 }
 
 const getEnemyBaseData = function(enemy_idx) {
-    return conv(6, 0xe28e+5*enemy_idx);
+    return conv(6, 0xe28e+5*(enemy_idx-1));
 }
 
 const replaceText = function(rom, textIdx, text) {
@@ -186,10 +186,12 @@ const setPaletteSlot = function(rom, stage, dynIdx, entryIdx, newVal) {
     rom[start+5] = newVal;
 }
 
-function randomize(rom, rng, opts) {
+function randomize(_rom, rng, opts) {
     /*
     Initial rom changes
     */
+
+    let rom = Uint8Array.from(_rom);
 
     let start;
     let isNormal = opts.romType === 'normal';
@@ -637,6 +639,13 @@ function randomize(rom, rng, opts) {
         m.addAsm(4, 0xd095, `
             sbc #$00.b
             nop
+        `);
+    }
+
+    // qol - non knockback
+    if (opts.no_knockback) {
+        m.addAsm(4, 0xcb56, `
+            jmp $cb6f.w
         `);
     }
 

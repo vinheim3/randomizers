@@ -221,6 +221,15 @@ class M65816 {
         return [0xc8];
     }
 
+    jmp(tokens, getSize) {
+        if (tokens.length === 0) throw new Error('No args passed to jmp');
+        if (tokens[tokens.length-1] == 'w') {
+            return [0x4c, ...this.getAbs('jmp', tokens.slice(0,1), getSize)];
+        } else {
+            throw new Error(`Could not process jmp ${tokens}`);
+        }
+    }
+
     jsr(tokens, getSize) {
         if (tokens.length === 0) throw new Error('No args passed to jsr');
         if (tokens[tokens.length-1] == 'w') {

@@ -108,12 +108,12 @@
             </div>
           </div>
 
-          <!-- <div class="field">
+          <div class="field">
             <label class="label">Random Boss Weakness</label>
             <div class="control">
               <input type="checkbox" v-model="random_boss_weakness">
             </div>
-          </div> -->
+          </div>
 
           <div class="field">
             <label class="label">Random Boss Drop</label>
@@ -125,16 +125,23 @@
 
         <div v-show="tab==='beta_test'">
           <div class="field">
-            <label class="label">Take 0 damage in most cases (beta testing)</label>
+            <label class="label">Take 0 damage in most cases</label>
             <div class="control">
               <input type="checkbox" v-model="zero_damage">
             </div>
           </div>
 
           <div class="field">
-            <label class="label">Most enemies spawn with 1hp (beta testing)</label>
+            <label class="label">Most enemies spawn with 1hp</label>
             <div class="control">
               <input type="checkbox" v-model="enemies_1hp">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">No knockback</label>
+            <div class="control">
+              <input type="checkbox" v-model="no_knockback">
             </div>
           </div>
         </div>
@@ -210,6 +217,7 @@
           skip_intro: true,
           zero_damage: false,
           enemies_1hp: false,
+          no_knockback: false,
           random_boss_hp: false,
           random_boss_weakness: false,
           random_boss_drop: false,
