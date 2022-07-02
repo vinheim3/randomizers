@@ -683,6 +683,9 @@ function randomize(rom, rng, opts) {
         nop
         nop
     `);
+    m.addAsm(2, 0xd58a, `
+    SetCarryIfEntityWayOutOfView:
+    `);
     m.addAsm(5, null, `
     SetCapsuleItemGiverTextIdx:
         phd
@@ -695,8 +698,12 @@ function randomize(rom, rng, opts) {
     _nextEntity:
         lda Enemy_type.b
         cmp #$4d.b
-        beq _exitLoop
+        bne _toNextEntity
 
+        jsr SetCarryIfEntityWayOutOfView.l
+        bcc _exitLoop
+
+    _toNextEntity:
         rep #$20.b
         tdc
         clc
