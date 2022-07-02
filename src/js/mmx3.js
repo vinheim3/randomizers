@@ -181,6 +181,11 @@ const replaceText = function(rom, textIdx, text) {
     }
 }
 
+const setPaletteSlot = function(rom, stage, dynIdx, entryIdx, newVal) {
+    let start = getDynamicSpriteData(rom, stage, dynIdx, entryIdx);
+    rom[start+5] = newVal;
+}
+
 function randomize(rom, rng, opts) {
     /*
     Initial rom changes
@@ -227,6 +232,11 @@ function randomize(rom, rng, opts) {
     rom[start] = DECOMP_DATA_IDX_RIDE_ARMOUR_ITEM;
     writeWord(rom, start+3, 0x1c);
 
+    // Give swappable rider armour items a slot that doesn't conflict with eg health bar
+    setPaletteSlot(rom, STAGE_GRAVITY_BEETLE, 5, 3, 0x30);
+    setPaletteSlot(rom, STAGE_TOXIC_SEAHORSE, 4, 2, 0x30);
+    setPaletteSlot(rom, STAGE_CRUSH_CRAWFISH, 0, 3, 0x30);
+
     // Move capsule locations down to the ground
     // (6:ccbe - 3c:xxxx data)
     for (let [stage, offset] of [
@@ -269,8 +279,7 @@ function randomize(rom, rng, opts) {
         [STAGE_TUNNEL_RHINO, 7, 1],
         [STAGE_VOLT_CATFISH, 4, 1],
     ]) {
-        start = getDynamicSpriteData(rom, stage, regionIdx, capsuleSpecOffs);
-        rom[start+5] = 0x60;
+        setPaletteSlot(rom, stage, regionIdx, capsuleSpecOffs, 0x60);
     }
 
     // Make capsule text shorter

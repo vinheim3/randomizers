@@ -166,6 +166,11 @@ class M65816 {
         }
     }
 
+    bcc(tokens, getSize) {
+        if (tokens.length === 0) throw new Error('No args passed to bcc');
+        return [0x90, ...this.getRel('bcc', tokens, getSize)];
+    }
+
     bcs(tokens, getSize) {
         if (tokens.length === 0) throw new Error('No args passed to bcs');
         return [0xb0, ...this.getRel('bcs', tokens, getSize)];
