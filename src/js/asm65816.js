@@ -22,7 +22,7 @@ class M65816 {
         let lineI = 0;
         let tokenI = 0;
         let loops = 0;
-        let seps = ' #.,';
+        let seps = ' #.,()';
         while (lineI < line.length) {
             let nextLineI;
             tokenI = lineI;
@@ -185,6 +185,8 @@ class M65816 {
         if (tokens.length === 0) throw new Error('No args passed to bit');
         if (tokens[0] === '#') {
             return [0x89, ...this.getImm('bit', tokens.slice(1, tokens.length), getSize)];
+        } else if (tokens[tokens.length-1] == 'w') {
+            return [0x2c, ...this.getAbs('bit', tokens.slice(0,1), getSize)];
         } else {
             throw new Error(`Could not process bit ${tokens}`);
         }
@@ -253,6 +255,8 @@ class M65816 {
             return [0xbd, ...this.getAbs('lda', tokens.slice(0,1), getSize)];
         } else if (tokens[tokens.length-3] == 'l' && tokens[tokens.length-2] == ',' && tokens[tokens.length-1] == 'X') {
             return [0xbf, ...this.getLong('lda', tokens.slice(0,1), getSize)];
+        } else if (tokens[tokens.length-1] == ')') {
+            return [0xb2, ...this.getDp('lda', tokens.slice(1,2), getSize)];
         } else {
             throw new Error(`Could not process lda ${tokens}`);
         }

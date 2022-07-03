@@ -437,143 +437,219 @@ function randomize(_rom, rng, opts) {
     let slots = [
         {
             name: "Blast Hornet Capsule",
+            stageIdx: STAGE_BLAST_HORNET,
+            itemName: "Head Chip",
             entityEntry: findStageEntityData(rom, STAGE_BLAST_HORNET, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_BLAST_HORNET, 3, 0),
+            minimapMarkerEntry: 0,
         },
         {
             name: "Blast Hornet Chimera Ride Armour",
+            stageIdx: STAGE_BLAST_HORNET,
             entityEntry: findStageEntityData(rom, STAGE_BLAST_HORNET, ...ENT_RIDE_ARMOUR_ITEM),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_BLAST_HORNET, 6, 3),
+            minimapMarkerEntry: 2,
         },
         {
             name: "Blast Hornet Heart Tank",
+            stageIdx: STAGE_BLAST_HORNET,
             entityEntry: findStageEntityData(rom, STAGE_BLAST_HORNET, ...ENT_HEART_TANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_BLAST_HORNET, 9, 0),
+            minimapMarkerEntry: 1,
         },
         {
             name: "Blizzard Buffalo Capsule",
+            stageIdx: STAGE_BLIZZARD_BUFFALO,
+            itemName: "Leg Upgrade",
             entityEntry: findStageEntityData(rom, STAGE_BLIZZARD_BUFFALO, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_BLIZZARD_BUFFALO, 6, 0),
+            minimapMarkerEntry: 2,
         },
         {
             name: "Blizzard Buffalo Heart Tank",
+            stageIdx: STAGE_BLIZZARD_BUFFALO,
             entityEntry: findStageEntityData(rom, STAGE_BLIZZARD_BUFFALO, ...ENT_HEART_TANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_BLIZZARD_BUFFALO, 1, 0),
             tileDataOffset: 0x1e00,
+            minimapMarkerEntry: 0,
         },
         {
             name: "Blizzard Buffalo Subtank",
+            stageIdx: STAGE_BLIZZARD_BUFFALO,
             entityEntry: findStageEntityData(rom, STAGE_BLIZZARD_BUFFALO, ...ENT_SUBTANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_BLIZZARD_BUFFALO, 5, 3),
+            minimapMarkerEntry: 1,
         },
         {
             name: "Crush Crawfish Capsule",
+            stageIdx: STAGE_CRUSH_CRAWFISH,
+            itemName: "Body Chip",
             entityEntry: findStageEntityData(rom, STAGE_CRUSH_CRAWFISH, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_CRUSH_CRAWFISH, 3, 0),
+            minimapMarkerEntry: 1,
         },
         {
             name: "Crush Crawfish Hawk Ride Armour",
+            stageIdx: STAGE_CRUSH_CRAWFISH,
             entityEntry: findStageEntityData(rom, STAGE_CRUSH_CRAWFISH, ...ENT_RIDE_ARMOUR_ITEM),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_CRUSH_CRAWFISH, 0, 3),
+            minimapMarkerEntry: 0,
         },
         // TODO: tile limitations prevent this
         // {
         //     name: "Crush Crawfish Heart Tank",
+        //     stageIdx: STAGE_CRUSH_CRAWFISH,
         //     entityEntry: findStageEntityData(rom, STAGE_CRUSH_CRAWFISH, ...ENT_HEART_TANK),
         //     dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_CRUSH_CRAWFISH, 2, 2),
+        //     minimapMarkerEntry: 2,
         // },
         {
             name: "Doppler 1 Capsule",
+            itemName: "Hyper Armour",
+            stageIdx: STAGE_DOPPLER_1,
             entityEntry: findStageEntityData(rom, STAGE_DOPPLER_1, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_DOPPLER_1, 8, 0),
         },
         {
             name: "Gravity Beetle Capsule",
+            stageIdx: STAGE_GRAVITY_BEETLE,
+            itemName: "Arm Chip",
             entityEntry: findStageEntityData(rom, STAGE_GRAVITY_BEETLE, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_GRAVITY_BEETLE, 10, 0),
+            minimapMarkerEntry: 2,
         },
         {
             name: "Gravity Beetle Frog Ride Armour",
+            stageIdx: STAGE_GRAVITY_BEETLE,
             entityEntry: findStageEntityData(rom, STAGE_GRAVITY_BEETLE, ...ENT_RIDE_ARMOUR_ITEM),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_GRAVITY_BEETLE, 5, 3),
+            minimapMarkerEntry: 1,
         },
         {
             name: "Gravity Beetle Heart Tank",
+            stageIdx: STAGE_GRAVITY_BEETLE,
             entityEntry: findStageEntityData(rom, STAGE_GRAVITY_BEETLE, ...ENT_HEART_TANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_GRAVITY_BEETLE, 0, 3),
+            minimapMarkerEntry: 0,
         },
         {
             name: "Neon Tiger Capsule",
+            stageIdx: STAGE_NEON_TIGER,
+            itemName: "Arm Upgrade",
             entityEntry: findStageEntityData(rom, STAGE_NEON_TIGER, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_NEON_TIGER, 2, 0),
+            minimapMarkerEntry: 1,
         },
         {
             name: "Neon Tiger Heart Tank",
+            stageIdx: STAGE_NEON_TIGER,
             entityEntry: findStageEntityData(rom, STAGE_NEON_TIGER, ...ENT_HEART_TANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_NEON_TIGER, 8, 0),
+            minimapMarkerEntry: 2,
         },
         {
             name: "Neon Tiger Subtank",
+            stageIdx: STAGE_NEON_TIGER,
             entityEntry: findStageEntityData(rom, STAGE_NEON_TIGER, ...ENT_SUBTANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_NEON_TIGER, 0, 3),
+            minimapMarkerEntry: 0,
         },
         {
             name: "Toxic Seahorse Capsule",
+            stageIdx: STAGE_TOXIC_SEAHORSE,
+            itemName: "Leg Chip",
             entityEntry: findStageEntityData(rom, STAGE_TOXIC_SEAHORSE, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_TOXIC_SEAHORSE, 7, 0),
+            minimapMarkerEntry: 2,
         },
         {
             name: "Toxic Seahorse Heart Tank",
+            stageIdx: STAGE_TOXIC_SEAHORSE,
             entityEntry: findStageEntityData(rom, STAGE_TOXIC_SEAHORSE, ...ENT_HEART_TANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_TOXIC_SEAHORSE, 1, 3),
+            minimapMarkerEntry: 0,
         },
         {
             name: "Toxic Seahorse Kangaroo Ride Armour",
+            stageIdx: STAGE_TOXIC_SEAHORSE,
             entityEntry: findStageEntityData(rom, STAGE_TOXIC_SEAHORSE, ...ENT_RIDE_ARMOUR_ITEM),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_TOXIC_SEAHORSE, 4, 2),
+            minimapMarkerEntry: 1,
         },
         {
             name: "Tunnel Rhino Capsule",
+            stageIdx: STAGE_TUNNEL_RHINO,
+            itemName: "Helmet Upgrade",
             entityEntry: findStageEntityData(rom, STAGE_TUNNEL_RHINO, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_TUNNEL_RHINO, 7, 1),
+            minimapMarkerEntry: 2,
         },
         {
             name: "Tunnel Rhino Heart Tank",
+            stageIdx: STAGE_TUNNEL_RHINO,
             entityEntry: findStageEntityData(rom, STAGE_TUNNEL_RHINO, ...ENT_HEART_TANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_TUNNEL_RHINO, 2, 0),
             tileDataOffset: 0x1600,
+            minimapMarkerEntry: 0,
         },
         {
             name: "Tunnel Rhino Subtank",
+            stageIdx: STAGE_TUNNEL_RHINO,
             entityEntry: findStageEntityData(rom, STAGE_TUNNEL_RHINO, ...ENT_SUBTANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_TUNNEL_RHINO, 4, 0),
+            minimapMarkerEntry: 1,
         },
         {
             name: "Volt Catfish Capsule",
+            stageIdx: STAGE_VOLT_CATFISH,
+            itemName: "Body Upgrade",
             entityEntry: findStageEntityData(rom, STAGE_VOLT_CATFISH, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_VOLT_CATFISH, 4, 1),
+            minimapMarkerEntry: 0,
         },
         {
             name: "Volt Catfish Heart Tank",
+            stageIdx: STAGE_VOLT_CATFISH,
             entityEntry: findStageEntityData(rom, STAGE_VOLT_CATFISH, ...ENT_HEART_TANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_VOLT_CATFISH, 3, 0),
+            minimapMarkerEntry: 1,
         },
         {
             name: "Volt Catfish Subtank",
+            stageIdx: STAGE_VOLT_CATFISH,
             entityEntry: findStageEntityData(rom, STAGE_VOLT_CATFISH, ...ENT_SUBTANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_VOLT_CATFISH, 8, 0),
+            minimapMarkerEntry: 2,
         },
     ]
 
+    // points to stage1 of this table, $13 bytes per stage, 6 bytes per entry
+    let minimapMarkerTable = conv(6, 0xb01c);
+
     let items = [];
     for (let slot of slots) {
+        let ramByteLowToCheck;
+        let ramBitToCheck;
+        if (slot.minimapMarkerEntry !== undefined) {
+            let minimapMarkerEntry = minimapMarkerTable +
+                0x13 * (slot.stageIdx-1) + 6 * slot.minimapMarkerEntry;
+            ramByteLowToCheck = rom[minimapMarkerEntry+3];
+            ramBitToCheck = rom[minimapMarkerEntry+5];
+        } else {
+            // Doppler 1
+            ramByteLowToCheck = 0xd7;
+            ramBitToCheck = 0xf0;
+        }
+
         items.push({
-            name: slot.name,
+            name: slot.itemName || slot.name,
             majorType: rom[slot.entityEntry+0],
             type: rom[slot.entityEntry+3],
             subType: rom[slot.entityEntry+4],
             decompIdx: rom[slot.dynamicSpriteEntry+0],
             paletteId: readWord(rom, slot.dynamicSpriteEntry+3),
+            ramByteLowToCheck: ramByteLowToCheck,
+            ramBitToCheck: ramBitToCheck,
         })
     }
 
@@ -626,6 +702,12 @@ function randomize(_rom, rng, opts) {
             writeWord(rom, slot.dynamicSpriteEntry+1, slot.tileDataOffset);
         }
         writeWord(rom, slot.dynamicSpriteEntry+3, item.paletteId);
+
+        // Change minimap marker entry details
+        let minimapMarkerEntry = minimapMarkerTable +
+            0x13 * (slot.stageIdx-1) + 6 * slot.minimapMarkerEntry;
+        rom[minimapMarkerEntry+3] = item.ramByteLowToCheck;
+        rom[minimapMarkerEntry+5] = item.ramBitToCheck;
     }
 
     // qol - skip intro stage (by pianohombre)
@@ -669,6 +751,36 @@ function randomize(_rom, rng, opts) {
             nop
         `);
     }
+
+    // qol - minimap marker can cater to hyper armour
+    m.addAsm(4, 0x9080, `
+    ; Return zflag set to display marker
+        jsr CheckMinimapMarkerForHyperArmour.l
+        nop
+    `);
+    m.addAsm(0x13, null, `
+    CheckMinimapMarkerForHyperArmour:
+        lda $000a.w
+        cmp #$f0.b
+        bne _normalMinimapMarkerCheck
+
+        lda ($10)
+        and #$f0.b
+        cmp #$f0.b
+        beq _gotHyperArmour
+
+        sep #$02.b
+        rtl
+
+    _gotHyperArmour:
+        rep #$02.b
+        rtl
+
+    _normalMinimapMarkerCheck:
+        lda ($10)
+        bit $000a.w
+        rtl
+    `);
 
     // Can use ride armour even if no chimera
     if (isNormal) {
@@ -818,14 +930,13 @@ function randomize(_rom, rng, opts) {
     for (let i = 0; i < 15*4; i++) {
         rom[start+i] = 0;
     }
-    // subtype now helps determine if Hyper Armour (rather than stage)
-    m.addAsm(0x13, 0xc011, `
-        lda Enemy_subType.b
-        nop
-        cmp #$ff.b
+    // Skip Doppler capsule check so it's always displayed
+    m.addAsm(0x13, isNormal ? 0xc011 : 0xc019, `
+        jmp InitialCapsuleCheck.w
     `);
     // various hooks to use subtype to determine item, rather than stage
     m.addAsm(0x13, isNormal ? 0xc031 : 0xc034, `
+    InitialCapsuleCheck:
         jsr ConvertNewCapsuleParamToCapsuleItemGivingEntityParam.w
         tay
         nop
