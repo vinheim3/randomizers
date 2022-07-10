@@ -98,6 +98,13 @@
               <input type="checkbox" v-model="skip_intro">
             </div>
           </div>
+
+          <div class="field">
+            <label class="label">Always show items in Stage Select</label>
+            <div class="control">
+              <input type="checkbox" v-model="stage_sel_show_items">
+            </div>
+          </div>
         </div>
 
         <div v-show="tab==='options'">
@@ -215,6 +222,7 @@
           bossDetails: [],
 
           skip_intro: true,
+          stage_sel_show_items: true,
           zero_damage: false,
           enemies_1hp: false,
           no_knockback: false,

@@ -152,6 +152,8 @@ class M65816 {
         if (tokens.length === 0) throw new Error('No args passed to adc');
         if (tokens[0] === '#') {
             return [0x69, ...this.getImm('adc', tokens.slice(1, tokens.length), getSize)];
+        } else if (tokens[tokens.length-1] == 'b') {
+            return [0x65, ...this.getDp('adc', tokens.slice(0,1), getSize)];
         } else {
             throw new Error(`Could not process adc ${tokens}`);
         }
@@ -163,6 +165,15 @@ class M65816 {
             return [0x29, ...this.getImm('and', tokens.slice(1, tokens.length), getSize)];
         } else {
             throw new Error(`Could not process and ${tokens}`);
+        }
+    }
+
+    asl(tokens, getSize) {
+        if (tokens.length === 0) throw new Error('No args passed to asl');
+        if (tokens[0] === 'a') {
+            return [0x0a];
+        } else {
+            throw new Error(`Could not process asl ${tokens}`);
         }
     }
 
@@ -185,6 +196,8 @@ class M65816 {
         if (tokens.length === 0) throw new Error('No args passed to bit');
         if (tokens[0] === '#') {
             return [0x89, ...this.getImm('bit', tokens.slice(1, tokens.length), getSize)];
+        } else if (tokens[tokens.length-1] == 'b') {
+            return [0x24, ...this.getDp('bit', tokens.slice(0,1), getSize)];
         } else if (tokens[tokens.length-1] == 'w') {
             return [0x2c, ...this.getAbs('bit', tokens.slice(0,1), getSize)];
         } else {
@@ -212,6 +225,23 @@ class M65816 {
             return [0xc9, ...this.getImm('cmp', tokens.slice(1, tokens.length), getSize)];
         } else {
             throw new Error(`Could not process cmp ${tokens}`);
+        }
+    }
+
+    dex(tokens, getSize) {
+        return [0xca];
+    }
+
+    dey(tokens, getSize) {
+        return [0x88];
+    }
+
+    inc(tokens, getSize) {
+        if (tokens.length === 0) throw new Error('No args passed to inc');
+        if (tokens[0] === 'a') {
+            return [0x1a];
+        } else {
+            throw new Error(`Could not process inc ${tokens}`);
         }
     }
 
@@ -253,6 +283,8 @@ class M65816 {
             return [0xad, ...this.getAbs('lda', tokens.slice(0,1), getSize)];
         } else if (tokens[tokens.length-3] == 'w' && tokens[tokens.length-2] == ',' && tokens[tokens.length-1] == 'X') {
             return [0xbd, ...this.getAbs('lda', tokens.slice(0,1), getSize)];
+        } else if (tokens[tokens.length-3] == 'w' && tokens[tokens.length-2] == ',' && tokens[tokens.length-1] == 'Y') {
+            return [0xb9, ...this.getAbs('lda', tokens.slice(0,1), getSize)];
         } else if (tokens[tokens.length-3] == 'l' && tokens[tokens.length-2] == ',' && tokens[tokens.length-1] == 'X') {
             return [0xbf, ...this.getLong('lda', tokens.slice(0,1), getSize)];
         } else if (tokens[tokens.length-1] == ')') {
@@ -266,7 +298,9 @@ class M65816 {
         if (tokens.length === 0) throw new Error('No args passed to ldx');
         if (tokens[0] === '#') {
             return [0xa2, ...this.getImm('ldx', tokens.slice(1, tokens.length), getSize)];
-        } else {
+        } else if (tokens[tokens.length-1] == 'b') {
+            return [0xa6, ...this.getDp('ldx', tokens.slice(0,1), getSize)];
+        }else {
             throw new Error(`Could not process ldx ${tokens}`);
         }
     }
@@ -405,6 +439,15 @@ class M65816 {
         }
     }
 
+    sty(tokens, getSize) {
+        if (tokens.length === 0) throw new Error('No args passed to sty');
+        if (tokens[tokens.length-1] == 'w') {
+            return [0x8c, ...this.getAbs('sty', tokens.slice(0,1), getSize)];
+        } else {
+            throw new Error(`Could not process sty ${tokens}`);
+        }
+    }
+
     tax(tokens, getSize) {
         return [0xaa];
     }
@@ -423,6 +466,10 @@ class M65816 {
 
     tya(tokens, getSize) {
         return [0x98];
+    }
+
+    xba(tokens, getSize) {
+        return [0xeb];
     }
 
     addAsm(placeBank, placeAddr, asm, name) {

@@ -36,7 +36,7 @@ const ITEMID_SUBTANK = 0x05;
 const ITEMID_HEART_TANK = 0x0b;
 const ITEMID_RIDE_ARMOUR_ITEM = 0x17;
 
-const ENEMYID_RIDE_ARMOUR_HOLDER = 0x4c;
+const ENEMYID_HANGERTER = 0x4c;
 const ENEMYID_CAPSULE = 0x4d;
 const ENEMYID_BLIZZARD_BUFFALO = 0x52;
 const ENEMYID_BLAST_HORNET = 0x53;
@@ -173,19 +173,36 @@ const getEnemyBaseData = function(enemy_idx) {
     return conv(6, 0xe28e+5*(enemy_idx-1));
 }
 
-const replaceText = function(rom, textIdx, text) {
-    let entry = conv(0x39, 0xc1bc + textIdx * 2);
-    // skip 7 bytes
-    let start = conv(0x39, readWord(rom, entry) + 7);
-    for (let line of text) {
-        for (let ch of line) {
-            rom[start++] = ch.charCodeAt(0);
+const getTextAddrs = function(rom, textIdx, isNormal) {
+    let addrs = [];
+    if (isNormal) {
+        let entry = conv(0x39, 0xc1bc + textIdx * 2);
+        addrs.push(conv(0x39, readWord(rom, entry)));
+    } else {
+        for (let bank = 0x40; bank < 0x48; bank += 2) {
+            let entry = conv(bank, 0x8000 + textIdx * 2);
+            addrs.push(conv(bank, readWord(rom, entry)));
         }
-        rom[start++] = 0x80;
-        rom[start++] = 0x80;
     }
-    for (let b of [0x81, 0x80, 0x86, 0x0b, 0x87, 0x1e, 0x82]) {
-        rom[start++] = b;
+    return addrs;
+}
+
+const replaceText = function(rom, textIdx, isNormal, text) {
+    // skip 7 bytes
+    let addrs = getTextAddrs(rom, textIdx, isNormal);
+
+    for (let _start of addrs) {
+        let start = _start+7;
+        for (let line of text) {
+            for (let ch of line) {
+                rom[start++] = ch.charCodeAt(0);
+            }
+            rom[start++] = 0x80;
+            rom[start++] = 0x80;
+        }
+        for (let b of [0x81, 0x80, 0x86, 0x0b, 0x87, 0x1e, 0x82]) {
+            rom[start++] = b;
+        }
     }
 }
 
@@ -213,6 +230,7 @@ function randomize(_rom, rng, opts) {
         Enemy_sizeof: 0x40,
         wEnemyEntities: 0xd18,
         wBeatenStageIdx: 0xd4f,
+        wTextRowVramAddr: 0x6a,
     }, {
         0x03: isNormal ? 0xfa74 : 0xfa79,
         0x05: 0xfbee,
@@ -221,7 +239,7 @@ function randomize(_rom, rng, opts) {
         0x4a: 0xc0a6,
     });
 
-    const ENT_RIDE_ARMOUR_HOLDER = [MT_ENEMY, ENEMYID_RIDE_ARMOUR_HOLDER];
+    const ENT_RIDE_ARMOUR_HOLDER = [MT_ENEMY, ENEMYID_HANGERTER];
     const ENT_CAPSULE = [MT_ENEMY, ENEMYID_CAPSULE];
     const ENT_RIDE_ARMOUR_ITEM = [MT_ITEM, ITEMID_RIDE_ARMOUR_ITEM];
     const ENT_HEART_TANK = [MT_ITEM, ITEMID_HEART_TANK];
@@ -304,7 +322,7 @@ function randomize(_rom, rng, opts) {
         [0x0e, "Arm upgrade"],
         [0x46, "Hyper chip"],
     ]) {
-        replaceText(rom, textIdx, ["You got the", text]);
+        replaceText(rom, textIdx, isNormal, ["You got the", text]);
     }
 
     // Randomize boss health
@@ -442,6 +460,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_BLAST_HORNET, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_BLAST_HORNET, 3, 0),
             minimapMarkerEntry: 0,
+            textIdx: 0x5d,
         },
         {
             name: "Blast Hornet Chimera Ride Armour",
@@ -449,6 +468,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_BLAST_HORNET, ...ENT_RIDE_ARMOUR_ITEM),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_BLAST_HORNET, 6, 3),
             minimapMarkerEntry: 2,
+            textIdx: 0x28,
         },
         {
             name: "Blast Hornet Heart Tank",
@@ -456,6 +476,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_BLAST_HORNET, ...ENT_HEART_TANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_BLAST_HORNET, 9, 0),
             minimapMarkerEntry: 1,
+            textIdx: 0x24,
         },
         {
             name: "Blizzard Buffalo Capsule",
@@ -464,6 +485,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_BLIZZARD_BUFFALO, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_BLIZZARD_BUFFALO, 6, 0),
             minimapMarkerEntry: 2,
+            textIdx: 0x61,
         },
         {
             name: "Blizzard Buffalo Heart Tank",
@@ -472,6 +494,7 @@ function randomize(_rom, rng, opts) {
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_BLIZZARD_BUFFALO, 1, 0),
             tileDataOffset: 0x1e00,
             minimapMarkerEntry: 0,
+            textIdx: 0x24,
         },
         {
             name: "Blizzard Buffalo Subtank",
@@ -479,6 +502,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_BLIZZARD_BUFFALO, ...ENT_SUBTANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_BLIZZARD_BUFFALO, 5, 3),
             minimapMarkerEntry: 1,
+            textIdx: 0x55,
         },
         {
             name: "Crush Crawfish Capsule",
@@ -487,6 +511,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_CRUSH_CRAWFISH, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_CRUSH_CRAWFISH, 3, 0),
             minimapMarkerEntry: 1,
+            textIdx: 0x5d,
         },
         {
             name: "Crush Crawfish Hawk Ride Armour",
@@ -494,6 +519,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_CRUSH_CRAWFISH, ...ENT_RIDE_ARMOUR_ITEM),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_CRUSH_CRAWFISH, 0, 3),
             minimapMarkerEntry: 0,
+            textIdx: 0x5b,
         },
         // TODO: tile limitations prevent this
         // {
@@ -502,6 +528,7 @@ function randomize(_rom, rng, opts) {
         //     entityEntry: findStageEntityData(rom, STAGE_CRUSH_CRAWFISH, ...ENT_HEART_TANK),
         //     dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_CRUSH_CRAWFISH, 2, 2),
         //     minimapMarkerEntry: 2,
+        //     textIdx: 0x24,
         // },
         {
             name: "Doppler 1 Capsule",
@@ -509,6 +536,7 @@ function randomize(_rom, rng, opts) {
             stageIdx: STAGE_DOPPLER_1,
             entityEntry: findStageEntityData(rom, STAGE_DOPPLER_1, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_DOPPLER_1, 8, 0),
+            textIdx: 0x5d,
         },
         {
             name: "Gravity Beetle Capsule",
@@ -517,6 +545,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_GRAVITY_BEETLE, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_GRAVITY_BEETLE, 10, 0),
             minimapMarkerEntry: 2,
+            textIdx: 0x5d,
         },
         {
             name: "Gravity Beetle Frog Ride Armour",
@@ -524,6 +553,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_GRAVITY_BEETLE, ...ENT_RIDE_ARMOUR_ITEM),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_GRAVITY_BEETLE, 5, 3),
             minimapMarkerEntry: 1,
+            textIdx: 0x57,
         },
         {
             name: "Gravity Beetle Heart Tank",
@@ -531,6 +561,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_GRAVITY_BEETLE, ...ENT_HEART_TANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_GRAVITY_BEETLE, 0, 3),
             minimapMarkerEntry: 0,
+            textIdx: 0x24,
         },
         {
             name: "Neon Tiger Capsule",
@@ -539,6 +570,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_NEON_TIGER, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_NEON_TIGER, 2, 0),
             minimapMarkerEntry: 1,
+            textIdx: 0x67,
         },
         {
             name: "Neon Tiger Heart Tank",
@@ -546,6 +578,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_NEON_TIGER, ...ENT_HEART_TANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_NEON_TIGER, 8, 0),
             minimapMarkerEntry: 2,
+            textIdx: 0x24,
         },
         {
             name: "Neon Tiger Subtank",
@@ -553,6 +586,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_NEON_TIGER, ...ENT_SUBTANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_NEON_TIGER, 0, 3),
             minimapMarkerEntry: 0,
+            textIdx: 0x55,
         },
         {
             name: "Toxic Seahorse Capsule",
@@ -561,6 +595,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_TOXIC_SEAHORSE, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_TOXIC_SEAHORSE, 7, 0),
             minimapMarkerEntry: 2,
+            textIdx: 0x5d,
         },
         {
             name: "Toxic Seahorse Heart Tank",
@@ -568,6 +603,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_TOXIC_SEAHORSE, ...ENT_HEART_TANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_TOXIC_SEAHORSE, 1, 3),
             minimapMarkerEntry: 0,
+            textIdx: 0x24,
         },
         {
             name: "Toxic Seahorse Kangaroo Ride Armour",
@@ -575,6 +611,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_TOXIC_SEAHORSE, ...ENT_RIDE_ARMOUR_ITEM),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_TOXIC_SEAHORSE, 4, 2),
             minimapMarkerEntry: 1,
+            textIdx: 0x59,
         },
         {
             name: "Tunnel Rhino Capsule",
@@ -583,6 +620,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_TUNNEL_RHINO, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_TUNNEL_RHINO, 7, 1),
             minimapMarkerEntry: 2,
+            textIdx: 0x65,
         },
         {
             name: "Tunnel Rhino Heart Tank",
@@ -591,6 +629,7 @@ function randomize(_rom, rng, opts) {
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_TUNNEL_RHINO, 2, 0),
             tileDataOffset: 0x1600,
             minimapMarkerEntry: 0,
+            textIdx: 0x24,
         },
         {
             name: "Tunnel Rhino Subtank",
@@ -598,6 +637,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_TUNNEL_RHINO, ...ENT_SUBTANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_TUNNEL_RHINO, 4, 0),
             minimapMarkerEntry: 1,
+            textIdx: 0x55,
         },
         {
             name: "Volt Catfish Capsule",
@@ -606,6 +646,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_VOLT_CATFISH, ...ENT_CAPSULE),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_VOLT_CATFISH, 4, 1),
             minimapMarkerEntry: 0,
+            textIdx: 0x63,
         },
         {
             name: "Volt Catfish Heart Tank",
@@ -613,6 +654,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_VOLT_CATFISH, ...ENT_HEART_TANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_VOLT_CATFISH, 3, 0),
             minimapMarkerEntry: 1,
+            textIdx: 0x24,
         },
         {
             name: "Volt Catfish Subtank",
@@ -620,6 +662,7 @@ function randomize(_rom, rng, opts) {
             entityEntry: findStageEntityData(rom, STAGE_VOLT_CATFISH, ...ENT_SUBTANK),
             dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_VOLT_CATFISH, 8, 0),
             minimapMarkerEntry: 2,
+            textIdx: 0x55,
         },
     ]
 
@@ -650,6 +693,7 @@ function randomize(_rom, rng, opts) {
             paletteId: readWord(rom, slot.dynamicSpriteEntry+3),
             ramByteLowToCheck: ramByteLowToCheck,
             ramBitToCheck: ramBitToCheck,
+            textIdx: slot.textIdx,
         })
     }
 
@@ -690,6 +734,10 @@ function randomize(_rom, rng, opts) {
     Mutate
     */
 
+    // 4 bytes: flag, ram addr, text idx
+    // per 3 texts per 8 stages
+    let stageSelItemFlagAddrText = new Array(3 * 4 * 8);
+
     // mutate slots
     for (let assignedSlot of newSlots) {
         let slot = assignedSlot.slot;
@@ -708,7 +756,32 @@ function randomize(_rom, rng, opts) {
             0x13 * (slot.stageIdx-1) + 6 * slot.minimapMarkerEntry;
         rom[minimapMarkerEntry+3] = item.ramByteLowToCheck;
         rom[minimapMarkerEntry+5] = item.ramBitToCheck;
+
+        if (slot.minimapMarkerEntry !== undefined) {
+            let base = (slot.stageIdx-1) * 4*3 + slot.minimapMarkerEntry * 4;
+            stageSelItemFlagAddrText[base] = item.ramBitToCheck;
+            stageSelItemFlagAddrText[base+1] = item.ramByteLowToCheck;
+            stageSelItemFlagAddrText[base+2] = 0x1f;
+            stageSelItemFlagAddrText[base+3] = item.textIdx;
+        }
     }
+
+    // Cater to Crush Crawfish Heart Tank (3rd entry)
+    let base = (STAGE_CRUSH_CRAWFISH-1) * 4*3 + 2 * 4;
+    stageSelItemFlagAddrText[base] = 0x20;
+    stageSelItemFlagAddrText[base+1] = 0xd4;
+    stageSelItemFlagAddrText[base+2] = 0x1f;
+    stageSelItemFlagAddrText[base+3] = 0x24;
+
+    m.addAsm(0x13, null, `
+    StageSelItemFlagAddrText:
+    `);
+    start = conv(0x13, m.bankEnds[0x13]);
+    for (let i = 0; i < stageSelItemFlagAddrText.length; i++) {
+        rom[start+i] = stageSelItemFlagAddrText[i];
+    }
+    
+    m.bankEnds[0x13] += stageSelItemFlagAddrText.length;
 
     // qol - skip intro stage (by pianohombre)
     if (opts.skip_intro) {
@@ -721,6 +794,14 @@ function randomize(_rom, rng, opts) {
             ldx #$01.b
             nop
             stx wStageIdx.w
+        `);
+    }
+
+    // qol - show items in stage select
+    if (opts.stage_sel_show_items) {
+        m.addAsm(3, 0x84b6, `
+            nop
+            nop
         `);
     }
 
@@ -779,6 +860,153 @@ function randomize(_rom, rng, opts) {
     _normalMinimapMarkerCheck:
         lda ($10)
         bit $000a.w
+        rtl
+    `);
+
+    // qol - stage select shows correct items
+    for (let _textIdx of [
+            0x24, 0x28, 0x55, 0x57, 0x59, 0x5b, 
+            0x5d, 0x61, 0x63, 0x65, 0x67]) {
+
+        for (let textIdx of [_textIdx, _textIdx+1]) {
+            let textAddrs = getTextAddrs(rom, textIdx, isNormal);
+
+            for (let textAddr of textAddrs) {
+                if (rom[textAddr] != 0x89) 
+                    throw new Error(`Stage select text byte 0 not $89: ${hexc(textIdx)}`);
+                let palByte = rom[textAddr+3];
+                if ((palByte&0xf0) !== 0xc0) 
+                    throw new Error(`Stage select text 4th byte not a palette: ${hexc(textIdx)}`);
+                rom[textAddr] = palByte;
+                rom[textAddr+1] = palByte;
+                rom[textAddr+2] = palByte;
+            }
+        }
+    }
+    m.addAsm(3, 0x8583, `
+        jsr AddTextThreadForStageSelect.l
+        nop
+        nop
+    `);
+    m.addAsm(3, 0x859a, `
+        jsr AddTextThreadForStageSelect.l
+        nop
+        nop
+    `);
+    m.addAsm(3, 0x85ae, `
+        jsr AddTextThreadForStageSelect.l
+        nop
+        nop
+    `);
+    m.addAsm(0x13, null, `
+    ; A - text line
+    ; A8 I8
+    AddTextThreadForStageSelect:
+        pha
+
+    ; $9c0c = StageSelectLocationsData.w+8 - valid stage idx selected
+        ldx $36.b
+        lda $9c0c.w, X
+        rep #$10.b
+        ldy #$0942.w
+        cmp #$01.b
+        beq _setStageSelText
+
+        cmp #$03.b
+        beq _setStageSelText
+
+        cmp #$05.b
+        beq _setStageSelText
+
+        cmp #$07.b
+        beq _setStageSelText
+
+        ldy #$0956.w
+
+    _setStageSelText:
+        sty wTextRowVramAddr.w
+
+    ; Y = stage idx selected, X = text line
+        tay
+        lda #$00.b
+        xba
+        pla
+        inc a
+        tax
+
+    ; Re-use some dp vars
+        lda $37.b
+        pha
+        lda $38.b
+        pha
+        lda $39.b
+        pha
+
+    ; Stage * 12
+        dey
+        tya
+        asl a
+        asl a
+        sta $37.b
+        asl a
+        clc
+        adc $37.b
+
+        rep #$20.b
+
+    ; 4 bytes per minimap marker entry
+    _nextMinMapEntryForStageSelHud:
+        dex
+        beq _afterMinMapEntryForStageSelHud
+        clc
+        adc #4.w
+
+        pha
+        lda wTextRowVramAddr.w
+        clc
+        adc #$40.w
+        sta wTextRowVramAddr.w
+        pla
+        bra _nextMinMapEntryForStageSelHud
+
+    _afterMinMapEntryForStageSelHud:
+        tax
+        sep #$20.b
+
+        lda StageSelItemFlagAddrText.l,X
+        sta $39.b
+        inx
+        lda StageSelItemFlagAddrText.l,X
+        sta $37.b
+        inx
+        lda StageSelItemFlagAddrText.l,X
+        sta $38.b
+        inx
+
+        lda ($37)
+        bit $39.b
+        bne _keepStageSelText
+
+        pla
+        sta $39.b
+        pla
+        sta $38.b
+        pla
+        sta $37.b
+        lda StageSelItemFlagAddrText.l,X
+        inc a
+        sep #$10.b
+        rtl
+
+    _keepStageSelText:
+        pla
+        sta $39.b
+        pla
+        sta $38.b
+        pla
+        sta $37.b
+        lda StageSelItemFlagAddrText.l,X
+        sep #$10.b
         rtl
     `);
 
@@ -1051,6 +1279,12 @@ function randomize(_rom, rng, opts) {
     let bossDetails = [];
     for (let [bossName, deets] of Object.entries(bossData)) {
         bossDetails.push([bossName, deets.newHealth, deets.newWeakness, deets.newDrop]);
+    }
+
+    for (let [label, deets] of Object.entries(m.labels)) {
+        let [blockName, offs] = deets;
+        let romOffs = m.asm[blockName].placement + offs;
+        console.log(`Label ${label} at rom offset ${hexc(romOffs)}`);
     }
 
     return {
