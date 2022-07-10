@@ -883,21 +883,77 @@ function randomize(_rom, rng, opts) {
             }
         }
     }
-    m.addAsm(3, 0x8583, `
-        jsr AddTextThreadForStageSelect.l
-        nop
-        nop
-    `);
-    m.addAsm(3, 0x859a, `
-        jsr AddTextThreadForStageSelect.l
-        nop
-        nop
-    `);
-    m.addAsm(3, 0x85ae, `
-        jsr AddTextThreadForStageSelect.l
-        nop
-        nop
-    `);
+    if (isNormal) {
+        m.addAsm(3, 0x8583, `
+            jsr AddTextThreadForStageSelect.l
+            nop
+            nop
+        `);
+        m.addAsm(3, 0x859a, `
+            jsr AddTextThreadForStageSelect.l
+            nop
+            nop
+        `);
+        m.addAsm(3, 0x85ae, `
+            jsr AddTextThreadForStageSelect.l
+            nop
+            nop
+        `);
+    } else {
+        m.addAsm(3, 0x8583, `
+            jsr ZeroModAddTextThreadForStageSelect.l
+            nop
+            nop
+        `);
+        m.addAsm(3, 0x859a, `
+            jsr ZeroModAddTextThreadForStageSelect.l
+            nop
+            nop
+        `);
+        m.addAsm(3, 0x85ae, `
+            jsr ZeroModAddTextThreadForStageSelect.l
+            nop
+            nop
+        `);
+        m.addAsm(0x13, null, `
+        ; A - text line
+        ; A8 I8
+        ZeroModAddTextThreadForStageSelect:
+            pha
+
+            lda $1fd1.w
+            sta $0014.w
+            lda $1fd4.w
+            sta $0016.w
+            jsr $caaa51.l
+            bvs _allHealthTanksGot
+        
+            bra _setHealthTanksForStageSelItems
+        
+        _allHealthTanksGot:
+            lda #$ff.b
+        
+        _setHealthTanksForStageSelItems:
+            sta $1fd4.w
+            lda $7ef418.l
+            sta $1fd1.w
+            jsr $caaa62.l
+            ora $1fd1.w
+            sta $1fd1.w
+
+            pla
+            jsr AddTextThreadForStageSelect.l
+            pha
+
+            lda $0014.w
+            sta $1fd1.w
+            lda $0016.w
+            sta $1fd4.w
+
+            pla
+            rtl
+        `);
+    }
     m.addAsm(0x13, null, `
     ; A - text line
     ; A8 I8

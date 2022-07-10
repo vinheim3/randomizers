@@ -215,6 +215,11 @@ class M65816 {
         return [0x80, ...this.getRel('bra', tokens, getSize)];
     }
 
+    bvs(tokens, getSize) {
+        if (tokens.length === 0) throw new Error('No args passed to bvs');
+        return [0x70, ...this.getRel('bvs', tokens, getSize)];
+    }
+
     clc(tokens, getSize) {
         return [0x18];
     }
@@ -285,6 +290,8 @@ class M65816 {
             return [0xbd, ...this.getAbs('lda', tokens.slice(0,1), getSize)];
         } else if (tokens[tokens.length-3] == 'w' && tokens[tokens.length-2] == ',' && tokens[tokens.length-1] == 'Y') {
             return [0xb9, ...this.getAbs('lda', tokens.slice(0,1), getSize)];
+        } else if (tokens[tokens.length-1] == 'l') {
+            return [0xaf, ...this.getLong('lda', tokens.slice(0,1), getSize)];
         } else if (tokens[tokens.length-3] == 'l' && tokens[tokens.length-2] == ',' && tokens[tokens.length-1] == 'X') {
             return [0xbf, ...this.getLong('lda', tokens.slice(0,1), getSize)];
         } else if (tokens[tokens.length-1] == ')') {
@@ -330,6 +337,8 @@ class M65816 {
         if (tokens.length === 0) throw new Error('No args passed to ora');
         if (tokens[0] === '#') {
             return [0x09, ...this.getImm('ora', tokens.slice(1, tokens.length), getSize)];
+        } else if (tokens[tokens.length-1] == 'w') {
+            return [0x0d, ...this.getAbs('ora', tokens.slice(0,1), getSize)];
         } else {
             throw new Error(`Could not process ora ${tokens}`);
         }
