@@ -144,7 +144,7 @@ class M65816 {
         let currRomOffs = this.asm[this.currBlockName].placement + this.currOffs;
         let currOffs = this.toBankAddr(currRomOffs);
         let rel = destAddr - (currOffs + 2);
-        if (Math.abs(rel) >= 0x80) throw new Error(`Relative branch for destination, ${dest}, too large: ${hexc(rel)}`);
+        if (Math.abs(rel) >= 0x80) throw new Error(`Relative branch for destination, ${dest}, too large: ${this.hexc(rel)}`);
         return rel >= 0 ? [rel] : [rel + 0x100];
     }
 
