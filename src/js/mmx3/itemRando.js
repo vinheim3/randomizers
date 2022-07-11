@@ -392,6 +392,36 @@ function itemRandomize(rom, rng, opts, m) {
     
     m.bankEnds[0x13] += stageSelItemFlagAddrText.length;
 
+    // qol - minimap marker can cater to hyper armour
+    m.addAsm(4, 0x9080, `
+    ; Return zflag set to display marker
+        jsr CheckMinimapMarkerForHyperArmour.l
+        nop
+    `);
+    m.addAsm(0x13, null, `
+    CheckMinimapMarkerForHyperArmour:
+        lda $000a.w
+        cmp #$f0.b
+        bne _normalMinimapMarkerCheck
+
+        lda ($10)
+        and #$f0.b
+        cmp #$f0.b
+        beq _gotHyperArmour
+
+        sep #$02.b
+        rtl
+
+    _gotHyperArmour:
+        rep #$02.b
+        rtl
+
+    _normalMinimapMarkerCheck:
+        lda ($10)
+        bit $000a.w
+        rtl
+    `);
+
     // qol - stage select shows correct items
     for (let _textIdx of [
         0x24, 0x28, 0x55, 0x57, 0x59, 0x5b, 

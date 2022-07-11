@@ -28,6 +28,7 @@ function randomize(_rom, rng, opts) {
 
     prep(rom, rng, opts, m);
     let newSlots = itemRandomize(rom, rng, opts, m);
+    paletteRandomize(rom, rng, opts, m);
 
     // Randomize boss health
     if (opts.random_boss_hp) {
@@ -152,34 +153,6 @@ function randomize(_rom, rng, opts) {
         m.bankEnds[0x06] += 8;
     }
 
-    // Randomize palettes
-    if (opts.random_palettes) {
-        let newPalettes = new Array(palAddrs.length);
-        let palPool = [];
-        for (let addr of palAddrs) {
-            let start = conv(0xc, addr);
-            palPool.push(rom.slice(start, start+0x20));
-        }
-        let unassignedPals = [];
-        for (let i = 0; i < palAddrs.length; i++) unassignedPals.push(i);
-        while (unassignedPals.length !== 0) {
-            let slotIdx = Math.floor(rng() * unassignedPals.length);
-            let palsIdx = Math.floor(rng() * palPool.length);
-            newPalettes[unassignedPals[slotIdx]] = palPool[palsIdx];
-            unassignedPals.splice(slotIdx, 1);
-            palPool.splice(palsIdx, 1);
-        }
-        // mutate
-        for (let i = 0; i < palAddrs.length; i++) {
-            let palAddr = palAddrs[i];
-            let start = conv(0xc, palAddr);
-            let pals = newPalettes[i];
-            for (let j = 0; j < 0x20; j++) {
-                rom[start++] = pals[j];
-            }
-        }
-    }
-
     // qol - skip intro stage (by pianohombre)
     if (opts.skip_intro) {
         m.addAsm(0, 0x99bd, `
@@ -229,36 +202,6 @@ function randomize(_rom, rng, opts) {
             nop
         `);
     }
-
-    // qol - minimap marker can cater to hyper armour
-    m.addAsm(4, 0x9080, `
-    ; Return zflag set to display marker
-        jsr CheckMinimapMarkerForHyperArmour.l
-        nop
-    `);
-    m.addAsm(0x13, null, `
-    CheckMinimapMarkerForHyperArmour:
-        lda $000a.w
-        cmp #$f0.b
-        bne _normalMinimapMarkerCheck
-
-        lda ($10)
-        and #$f0.b
-        cmp #$f0.b
-        beq _gotHyperArmour
-
-        sep #$02.b
-        rtl
-
-    _gotHyperArmour:
-        rep #$02.b
-        rtl
-
-    _normalMinimapMarkerCheck:
-        lda ($10)
-        bit $000a.w
-        rtl
-    `);
 
     // Can use ride armour even if no chimera
     if (isNormal) {
