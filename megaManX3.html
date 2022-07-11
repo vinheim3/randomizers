@@ -148,6 +148,13 @@
               <input type="checkbox" v-model="hsl_palettes">
             </div>
           </div>
+
+          <div class="field">
+            <label class="label">GB Palettes</label>
+            <div class="control">
+              <input type="checkbox" v-model="gb_palettes">
+            </div>
+          </div>
         </div>
 
         <div v-show="tab==='beta_test'">
@@ -251,6 +258,7 @@
           random_boss_drop: false,
           chaos_palettes: false,
           hsl_palettes: false,
+          gb_palettes: false,
         },
         methods: {
           fileChange: function() {
