@@ -175,6 +175,13 @@
               <input type="checkbox" v-model="vb_palettes">
             </div>
           </div>
+
+          <div class="field">
+            <label class="label">Greyscale</label>
+            <div class="control">
+              <input type="checkbox" v-model="greyscale">
+            </div>
+          </div>
         </div>
 
         <div v-show="tab==='beta_test'">
@@ -282,6 +289,7 @@
           hsl_palettes: false,
           gb_palettes: false,
           vb_palettes: false,
+          greyscale: false,
         },
         methods: {
           fileChange: function() {

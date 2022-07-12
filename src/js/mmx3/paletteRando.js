@@ -136,4 +136,22 @@ function paletteRandomize(rom, rng, opts, m) {
             }
         }
     }
+
+    if (opts.greyscale) {
+        let greys = [
+            rgb2snes(0x00, 0x00, 0x00),
+            rgb2snes(0x0a, 0x0a, 0x0a),
+            rgb2snes(0x14, 0x14, 0x14),
+            rgb2snes(0x1e, 0x1e, 0x1e),
+        ];
+        for (let palAddr of palAddrs) {
+            let start = conv(0xc, palAddr);
+            for (let i = 0; i < 0x20; i += 2) {
+                let snesCol = readWord(rom, start+i);
+                let [h, s, l] = rgb2hsl(...snes2rgb(snesCol));
+                let greenCol = Math.floor(l/0.25);
+                writeWord(rom, start+i, greys[Math.min(greenCol, 3)]);
+            }
+        }
+    }
 }
