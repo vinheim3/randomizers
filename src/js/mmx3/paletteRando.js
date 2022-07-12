@@ -93,8 +93,8 @@ function paletteRandomize(rom, rng, opts, m) {
                 let snesCol = readWord(rom, start+i);
                 let [h, s, l] = rgb2hsl(...snes2rgb(snesCol));
                 h = (h + hOffs) % 360;
-                s *= sMult;
-                l *= lMult;
+                s = Math.min(s*sMult, 1);
+                l = Math.min(l*lMult, 1);
                 let newSnesCol = rgb2snes(...hsl2rgb(h, s, l));
                 writeWord(rom, start+i, newSnesCol);
             }
