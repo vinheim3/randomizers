@@ -119,6 +119,12 @@
             <div class="control">
               <input type="checkbox" v-model="random_boss_hp">
             </div>
+            <div class="control">
+              Min HP: <input class="input" type="number" v-model="min_boss_hp">
+            </div>
+            <div class="control">
+              Max HP: <input class="input" type="number" v-model="max_boss_hp">
+            </div>
           </div>
 
           <div class="field">
@@ -254,6 +260,8 @@
           enemies_1hp: false,
           no_knockback: false,
           random_boss_hp: false,
+          min_boss_hp: 16,
+          max_boss_hp: 36,
           random_boss_weakness: false,
           random_boss_drop: false,
           chaos_palettes: false,

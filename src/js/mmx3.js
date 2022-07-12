@@ -36,7 +36,10 @@ function randomize(_rom, rng, opts) {
             let healthAddr = deets.maxHealth;
             if (rom[healthAddr-1] !== 0xc9 || rom[healthAddr] !== 0x20)
                 throw new Error(`Boss ${bossName} health address is wrong`);
-            let health = Math.floor(rng() * 20) + 0x10;
+
+            let minHp = opts.min_boss_hp;
+            let maxHp = opts.max_boss_hp+1;
+            let health = Math.floor(rng() * (maxHp-minHp)) + minHp;
             rom[healthAddr] = health;
             bossData[bossName].newHealth = health;
         }
