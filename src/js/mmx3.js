@@ -18,6 +18,10 @@ function randomize(_rom, rng, opts) {
         wEnemyEntities: 0xd18,
         wBeatenStageIdx: 0xd4f,
         wTextRowVramAddr: 0x6a,
+        wJoy1CurrButtonsHeld: 0xa8,
+        wJoy1CurrBtnsPressed: 0xac,
+        wCurrHealth: 0x9ff,
+        wNumLives: 0x1fb4,
     }, {
         0x03: isNormal ? 0xfa74 : 0xfa79,
         0x05: 0xfbee,
@@ -31,17 +35,58 @@ function randomize(_rom, rng, opts) {
     paletteRandomize(rom, rng, opts, m);
 
     // Scavenger hunt: num subweapons required
-    for (let addr of [
-        conv(3, 0x8076),
-        conv(0, 0xc255),
-        conv(0, 0xc307),
-        conv(0, 0xc420),
-        conv(0, 0xc459),
-        conv(0, 0xc491),
-    ]) {
-        // `cmp #$08.b`
-        if (rom[addr-1] !== 0xc9) throw new Error(`Invalid num subweapon check`);
-        rom[addr] = opts.subweps_required;
+    if (isNormal) {
+        for (let addr of [
+            conv(3, 0x8076),
+            conv(0, 0xc255),
+            conv(0, 0xc307),
+            conv(0, 0xc420),
+            conv(0, 0xc459),
+            conv(0, 0xc491),
+        ]) {
+            // `cmp #$08.b`
+            if (rom[addr-1] !== 0xc9) throw new Error(`Invalid num subweapon check ${hexc(addr)}`);
+            rom[addr] = opts.subweps_required;
+        }
+    } else {
+        m.addAsm(3, 0x806c, `
+            jsr ZeroModCheckGotSufficientSubweapons.l
+        `);
+        m.addAsm(0x13, null, `
+        ; Set A to $ff if got sufficient subweapons
+        ZeroModCheckGotSufficientSubweapons:
+            php
+            sep #$30.b
+            lda #$00.b
+            pha
+            lda $7ef4e2.l
+            ldx #$07.b
+
+        _nextWepInSubwepScavenger:
+            asl a
+            bcc _toNextWepInSubwepScavenger
+
+            pla
+            inc a
+            pha
+
+        _toNextWepInSubwepScavenger:
+        	dex
+            bpl _nextWepInSubwepScavenger
+
+            pla
+            cmp #$0${opts.subweps_required}.b
+            bcs _sufficientSubweapons
+
+            plp
+            lda #$00.b
+            rtl
+
+        _sufficientSubweapons:
+            plp
+            lda #$ff.b
+            rtl
+        `);
     }
 
     // Randomize boss health
@@ -169,6 +214,31 @@ function randomize(_rom, rng, opts) {
         }
         m.bankEnds[0x06] += 8;
     }
+
+    // qol - exit stage anytime
+    m.addAsm(8, 0x8604, `
+        jsr CheckSoftReset.l
+    `);
+    m.addAsm(0x13, null, `
+    CheckSoftReset:
+    ; From overwritten code
+        and wJoy1CurrButtonsHeld.b
+        sta wJoy1CurrBtnsPressed.b
+
+    ; B+Select
+        lda wJoy1CurrButtonsHeld.b
+        cmp #$a000.w
+        bne _endSoftResetCheck
+
+        sep #$20.b
+        lda #$00.b
+        sta wCurrHealth.w
+        sta wNumLives.w
+        rep #$20.b
+
+    _endSoftResetCheck:
+        rtl
+    `);
 
     // qol - skip intro stage (by pianohombre)
     if (opts.skip_intro) {

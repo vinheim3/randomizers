@@ -163,6 +163,8 @@ class M65816 {
         if (tokens.length === 0) throw new Error('No args passed to and');
         if (tokens[0] === '#') {
             return [0x29, ...this.getImm('and', tokens.slice(1, tokens.length), getSize)];
+        } else if (tokens[tokens.length-1] == 'b') {
+            return [0x25, ...this.getDp('and', tokens.slice(0,1), getSize)];
         } else {
             throw new Error(`Could not process and ${tokens}`);
         }
@@ -200,6 +202,8 @@ class M65816 {
             return [0x24, ...this.getDp('bit', tokens.slice(0,1), getSize)];
         } else if (tokens[tokens.length-1] == 'w') {
             return [0x2c, ...this.getAbs('bit', tokens.slice(0,1), getSize)];
+        } else if (tokens[tokens.length-3] == 'w' && tokens[tokens.length-2] == ',' && tokens[tokens.length-1] == 'X') {
+            return [0x3c, ...this.getAbs('bit', tokens.slice(0,1), getSize)];
         } else {
             throw new Error(`Could not process bit ${tokens}`);
         }
@@ -210,9 +214,19 @@ class M65816 {
         return [0xd0, ...this.getRel('bne', tokens, getSize)];
     }
 
+    bpl(tokens, getSize) {
+        if (tokens.length === 0) throw new Error('No args passed to bpl');
+        return [0x10, ...this.getRel('bpl', tokens, getSize)];
+    }
+
     bra(tokens, getSize) {
         if (tokens.length === 0) throw new Error('No args passed to bra');
         return [0x80, ...this.getRel('bra', tokens, getSize)];
+    }
+
+    bvc(tokens, getSize) {
+        if (tokens.length === 0) throw new Error('No args passed to bvc');
+        return [0x50, ...this.getRel('bvc', tokens, getSize)];
     }
 
     bvs(tokens, getSize) {
