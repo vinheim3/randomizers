@@ -30,6 +30,20 @@ function randomize(_rom, rng, opts) {
     let newSlots = itemRandomize(rom, rng, opts, m);
     paletteRandomize(rom, rng, opts, m);
 
+    // Scavenger hunt: num subweapons required
+    for (let addr of [
+        conv(3, 0x8076),
+        conv(0, 0xc255),
+        conv(0, 0xc307),
+        conv(0, 0xc420),
+        conv(0, 0xc459),
+        conv(0, 0xc491),
+    ]) {
+        // `cmp #$08.b`
+        if (rom[addr-1] !== 0xc9) throw new Error(`Invalid num subweapon check`);
+        rom[addr] = opts.subweps_required;
+    }
+
     // Randomize boss health
     if (opts.random_boss_hp) {
         for (let [bossName, deets] of Object.entries(bossData)) {

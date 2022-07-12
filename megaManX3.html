@@ -86,6 +86,11 @@
             </li>
           </ul>
           <ul>
+            <li v-bind:class="isTabSelected('game_modes')" v-on:click="selectTab('game_modes')">
+              <a href="#">New Game Modes</a>
+            </li>
+          </ul>
+          <ul>
             <li v-bind:class="isTabSelected('options')" v-on:click="selectTab('options')">
               <a href="#">Options</a>
             </li>
@@ -114,6 +119,18 @@
             <label class="label">Always show items in Stage Select</label>
             <div class="control">
               <input type="checkbox" v-model="stage_sel_show_items">
+            </div>
+          </div>
+        </div>
+
+        <div v-show="tab==='game_modes'">
+          <div class="field">
+            <label class="label">Scavenger Hunt: Doppler is subweapon-locked</label>
+            <div class="control">
+              <input type="checkbox" v-model="doppler_subwep_locked" disabled="disabled">
+            </div>
+            <div class="control">
+              Subweapons required: <input min="0" max="8" class="input" type="number" v-model="subweps_required">
             </div>
           </div>
         </div>
@@ -275,21 +292,32 @@
           newSlots: [],
           bossDetails: [],
 
+          // qol
           skip_intro: true,
           stage_sel_show_items: true,
-          zero_damage: false,
-          enemies_1hp: false,
-          no_knockback: false,
+
+          // new game mode
+          doppler_subwep_locked: true,
+          subweps_required: 8,
+
+          // options
           random_boss_hp: false,
           min_boss_hp: 16,
           max_boss_hp: 36,
           random_boss_weakness: false,
           random_boss_drop: false,
+
+          // colours
           chaos_palettes: false,
           hsl_palettes: false,
           gb_palettes: false,
           vb_palettes: false,
           greyscale: false,
+
+          // beta
+          zero_damage: false,
+          enemies_1hp: false,
+          no_knockback: false,
         },
         methods: {
           fileChange: function() {
