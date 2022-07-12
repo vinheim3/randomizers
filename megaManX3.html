@@ -91,6 +91,11 @@
             </li>
           </ul>
           <ul>
+            <li v-bind:class="isTabSelected('colours')" v-on:click="selectTab('colours')">
+              <a href="#">Colours</a>
+            </li>
+          </ul>
+          <ul>
             <li v-bind:class="isTabSelected('beta_test')" v-on:click="selectTab('beta_test')">
               <a href="#">Beta Testing</a>
             </li>
@@ -140,25 +145,34 @@
               <input type="checkbox" v-model="random_boss_drop">
             </div>
           </div>
+        </div>
 
+        <div v-show="tab==='colours'">
           <div class="field">
-            <label class="label">Chaos Palettes</label>
+            <label class="label">Chaos</label>
             <div class="control">
               <input type="checkbox" v-model="chaos_palettes">
             </div>
           </div>
 
           <div class="field">
-            <label class="label">HSL Palettes</label>
+            <label class="label">HSL random offsets</label>
             <div class="control">
               <input type="checkbox" v-model="hsl_palettes">
             </div>
           </div>
 
           <div class="field">
-            <label class="label">GB Palettes</label>
+            <label class="label">GameBoy</label>
             <div class="control">
               <input type="checkbox" v-model="gb_palettes">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Virtual Boy</label>
+            <div class="control">
+              <input type="checkbox" v-model="vb_palettes">
             </div>
           </div>
         </div>
@@ -267,6 +281,7 @@
           chaos_palettes: false,
           hsl_palettes: false,
           gb_palettes: false,
+          vb_palettes: false,
         },
         methods: {
           fileChange: function() {
