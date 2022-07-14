@@ -238,8 +238,9 @@
         </div>
 
         <div class="btn-margin">
-          <a class="button" :disabled="randomized===false" :download="fname" :href="createBlobURL">Download Randomized ROM</a>
-          <button class="button" :disabled="randomized===false" v-on:click="toggleSpoilers()">
+          <a class="button" :disabled="randomized!==true" :download="fname" :href="createBlobURL">Download Randomized ROM</a>
+          <a class="button" :disabled="randomized!==true||romType==='normal'||fname_prefix===''" :download="manifestFname" :href="createManifestBlobURL">Download Randomized Zero Mod Manifest</a>
+          <button class="button" :disabled="randomized!==true" v-on:click="toggleSpoilers()">
             <span v-if="showing_spoilers">Hide Spoiler Log</span>
             <span v-if="!showing_spoilers">Show Spoiler Log</span>
           </button>
@@ -295,6 +296,7 @@
           romType: 'normal',
           seed: "",
           tab: "options",
+          fname_prefix: "",
 
           newSlots: [],
           bossDetails: [],
@@ -330,6 +332,8 @@
         methods: {
           fileChange: function() {
             app.correctFileCRCcheck = null;
+            app.fname_prefix = '';
+            app.romType = 'normal';
 
             const selectedFile = document.getElementById('rom').files[0];
             let reader = new FileReader();
@@ -408,9 +412,47 @@
             return window.URL.createObjectURL(blob);
           },
 
+          createManifestBlobURL: function() {
+            if (!this.randomized) return '';
+            let blob = new Blob([`<?xml version="1.0" encoding="UTF-8"?>
+<cartridge region="NTSC">
+  <rom>
+    <map mode="linear" address="00-7f:8000-ffff"/>
+    <map mode="linear" address="80-ff:8000-ffff"/>
+  </rom>
+	
+  <ram size='2000'>
+    <map mode='linear' address='70-77:0000-7fff'/>
+    <map mode='linear' address='b0-bf:0000-7fff'/>
+  </ram>
+  
+  <cx4>
+    <map address="00-3f:6000-7fff"/>
+    <map address="80-bf:6000-7fff"/>
+  </cx4>
+
+  <msu1>
+    <map address="00-3f:2000-2007"/>
+    <map address="80-bf:2000-2007"/>
+  <mmio>
+    <map address="00-3f:2000-2007"/>
+    <map address="80-bf:2000-2007"/>
+  </mmio>
+  </msu1>
+</cartridge>`], {
+              type: 'application/xml'
+            });
+            return window.URL.createObjectURL(blob);
+          },
+
           fname: function() {
             let dt = new Date();
-            return `mmx3-${dt.toJSON()}.sfc`;
+            this.fname_prefix = `mmx3-${dt.toJSON()}`;
+            return `${this.fname_prefix}.sfc`;
+          },
+
+          manifestFname: function() {
+            return `${this.fname_prefix}.xml`;
           },
 
           orderedSlots: function() {
