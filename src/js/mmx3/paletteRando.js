@@ -101,7 +101,7 @@ function paletteRandomize(rom, rng, opts, m) {
         }
     }
 
-    if (opts.gb_palettes) {
+    if (opts.gb_green) {
         let greens = [
             rgb2snes(0x08, 0x0a, 0x02),
             rgb2snes(0x0e, 0x10, 0x05),
@@ -137,7 +137,7 @@ function paletteRandomize(rom, rng, opts, m) {
         }
     }
 
-    if (opts.greyscale) {
+    if (opts.gb_grey) {
         let greys = [
             rgb2snes(0x00, 0x00, 0x00),
             rgb2snes(0x0a, 0x0a, 0x0a),
@@ -151,6 +151,19 @@ function paletteRandomize(rom, rng, opts, m) {
                 let [h, s, l] = rgb2hsl(...snes2rgb(snesCol));
                 let greenCol = Math.floor(l/0.25);
                 writeWord(rom, start+i, greys[Math.min(greenCol, 3)]);
+            }
+        }
+    }
+
+    if (opts.greyscale) {
+        for (let palAddr of palAddrs) {
+            let start = conv(0xc, palAddr);
+            for (let i = 0; i < 0x20; i += 2) {
+                let snesCol = readWord(rom, start+i);
+                let [h, s, l] = rgb2hsl(...snes2rgb(snesCol));
+                s = 0;
+                let newSnesCol = rgb2snes(...hsl2rgb(h, s, l));
+                writeWord(rom, start+i, newSnesCol);
             }
         }
     }

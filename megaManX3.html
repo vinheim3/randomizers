@@ -180,9 +180,16 @@
           </div>
 
           <div class="field">
-            <label class="label">GameBoy</label>
+            <label class="label">GameBoy green</label>
             <div class="control">
-              <input type="checkbox" v-model="gb_palettes">
+              <input type="checkbox" v-model="gb_green">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">GameBoy grey</label>
+            <div class="control">
+              <input type="checkbox" v-model="gb_grey">
             </div>
           </div>
 
@@ -194,7 +201,7 @@
           </div>
 
           <div class="field">
-            <label class="label">Greyscale</label>
+            <label class="label">SNES grey</label>
             <div class="control">
               <input type="checkbox" v-model="greyscale">
             </div>
@@ -310,7 +317,8 @@
           // colours
           chaos_palettes: false,
           hsl_palettes: false,
-          gb_palettes: false,
+          gb_green: false,
+          gb_grey: false,
           vb_palettes: false,
           greyscale: false,
 
