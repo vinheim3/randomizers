@@ -48,6 +48,10 @@ function randomize(_rom, rng, opts) {
             if (rom[addr-1] !== 0xc9) throw new Error(`Invalid num subweapon check ${hexc(addr)}`);
             rom[addr] = opts.subweps_required;
         }
+
+        rom[conv(0, 0xc2d0)] = 0xb0; // bcs instead of beq after 3:8076
+        rom[conv(0, 0xc421)] = 0x90; // bcc instead of bne after 0:c420
+        rom[conv(0, 0xc492)] = 0x90; // bcc instead of bne after 0:c491
     } else {
         m.addAsm(3, 0x806c, `
             jsr ZeroModCheckGotSufficientSubweapons.l
