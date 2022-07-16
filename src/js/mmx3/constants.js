@@ -34,6 +34,10 @@ const ENT_RIDE_ARMOUR_ITEM = [MT_ITEM, ITEMID_RIDE_ARMOUR_ITEM];
 const ENT_HEART_TANK = [MT_ITEM, ITEMID_HEART_TANK];
 const ENT_SUBTANK = [MT_ITEM, ITEMID_SUBTANK];
 
+// New ram vars noted here
+// (TODO: have labels in banks, with base addrs), and routine to add labels
+let gotHyperArmour = 0x7ef4e3;
+
 // idxes into a table of $26 weakness vars
 const enemyWeaknesses = {
     0x12: "Gravity Well / Spinning Blade",

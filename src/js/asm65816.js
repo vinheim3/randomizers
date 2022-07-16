@@ -165,6 +165,8 @@ class M65816 {
             return [0x29, ...this.getImm('and', tokens.slice(1, tokens.length), getSize)];
         } else if (tokens[tokens.length-1] == 'b') {
             return [0x25, ...this.getDp('and', tokens.slice(0,1), getSize)];
+        } else if (tokens[tokens.length-1] == 'w') {
+            return [0x2d, ...this.getAbs('and', tokens.slice(0,1), getSize)];
         } else {
             throw new Error(`Could not process and ${tokens}`);
         }
@@ -242,6 +244,8 @@ class M65816 {
         if (tokens.length === 0) throw new Error('No args passed to cmp');
         if (tokens[0] === '#') {
             return [0xc9, ...this.getImm('cmp', tokens.slice(1, tokens.length), getSize)];
+        } else if (tokens[tokens.length-1] == 'w') {
+            return [0xcd, ...this.getAbs('cmp', tokens.slice(0,1), getSize)];
         } else {
             throw new Error(`Could not process cmp ${tokens}`);
         }
@@ -448,6 +452,8 @@ class M65816 {
             return [0x9d, ...this.getAbs('sta', tokens.slice(0,1), getSize)];
         } else if (tokens[tokens.length-3] == 'w' && tokens[tokens.length-2] == ',' && tokens[tokens.length-1] == 'Y') {
             return [0x99, ...this.getAbs('sta', tokens.slice(0,1), getSize)];
+        } else if (tokens[tokens.length-1] == 'l') {
+            return [0x8f, ...this.getLong('sta', tokens.slice(0,1), getSize)];
         } else {
             throw new Error(`Could not process sta ${tokens}`);
         }
@@ -487,6 +493,15 @@ class M65816 {
 
     tdc(tokens, getSize) {
         return [0x7b];
+    }
+
+    tsb(tokens, getSize) {
+        if (tokens.length === 0) throw new Error('No args passed to tsb');
+        if (tokens[tokens.length-1] == 'w') {
+            return [0x0c, ...this.getAbs('tsb', tokens.slice(0,1), getSize)];
+        } else {
+            throw new Error(`Could not process tsb ${tokens}`);
+        }
     }
 
     txy(tokens, getSize) {
@@ -589,6 +604,12 @@ class M65816 {
         let blockName = this.labels[label][0];
         let deets = this.asm[blockName];
         return deets.bank;
+    }
+
+    getLabelFullAddr(label) {
+        let [blockName, offs] = this.labels[label];
+        let deets = this.asm[blockName];
+        return deets.placement + offs;
     }
 
     compile(rom) {

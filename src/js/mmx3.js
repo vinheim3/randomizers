@@ -23,6 +23,9 @@ function randomize(_rom, rng, opts) {
         wCurrHealth: 0x9ff,
         wNumLives: 0x1fb4,
         wFrameCounter: 0x9cf,
+        wSubTanksAndUpgradesGottenBitfield: 0x1fd1,
+        wMaxHealth: 0x1fd2,
+        wHealthTanksGottenBitfield: 0x1fd4,
     }, {
         0x03: isNormal ? 0xfa74 : 0xfa79,
         0x05: 0xfbee,
@@ -34,6 +37,17 @@ function randomize(_rom, rng, opts) {
     prep(rom, rng, opts, m);
     let newSlots = itemRandomize(rom, rng, opts, m);
     paletteRandomize(rom, rng, opts, m);
+
+    // Clear some ram vars
+    m.addAsm(0, 0x800e, `
+        jsr ClearRandoRamVars.l
+    `);
+    m.addAsm(null, null, `
+    ClearRandoRamVars:
+        sta $7effff.l
+        sta $${hexc(gotHyperArmour)}.l
+        rtl
+    `);
 
     // Scavenger hunt: num subweapons required
     if (isNormal) {
@@ -57,7 +71,7 @@ function randomize(_rom, rng, opts) {
         m.addAsm(3, 0x806c, `
             jsr ZeroModCheckGotSufficientSubweapons.l
         `);
-        m.addAsm(0x13, null, `
+        m.addAsm(null, null, `
         ; Set A to $ff if got sufficient subweapons
         ZeroModCheckGotSufficientSubweapons:
             php

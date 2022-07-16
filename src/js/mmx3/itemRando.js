@@ -61,6 +61,7 @@ function itemRandomize(rom, rng, opts, m) {
     */
 
     // This is done here for the 'find'-type functions
+    // This is not in `constants.js` as `prep.js` needs to modify the base rom 1st
     let slots = [
         {
             name: "Blast Hornet Capsule",
@@ -302,6 +303,7 @@ function itemRandomize(rom, rng, opts, m) {
             ramByteLowToCheck: ramByteLowToCheck,
             ramBitToCheck: ramBitToCheck,
             textIdx: slot.textIdx,
+            slot_name: slot.name,
         })
     }
 
@@ -324,7 +326,7 @@ function itemRandomize(rom, rng, opts, m) {
     // Prevent volt catfish heart tank having a capsule
     for (let assignedSlot of newSlots) {
         if (assignedSlot.slot.name !== "Volt Catfish Heart Tank") continue;
-        if (assignedSlot.item.name.indexOf("Capsule") === -1) break;
+        if (assignedSlot.item.slot_name.indexOf("Capsule") === -1) break;
 
         for (let assignedSlot2 of newSlots) {
             if (assignedSlot2.slot.name === assignedSlot.slot.name) continue;
@@ -392,10 +394,8 @@ function itemRandomize(rom, rng, opts, m) {
         cmp #$f0.b
         bne _normalMinimapMarkerCheck
 
-        lda ($10)
-        and #$f0.b
-        cmp #$f0.b
-        beq _gotHyperArmour
+        lda $${hexc(gotHyperArmour)}.l
+        bne _gotHyperArmour
 
         sep #$02.b
         rtl
@@ -614,6 +614,29 @@ function itemRandomize(rom, rng, opts, m) {
         rtl
     `);
 
+    // Hyper Armour sets the relevant ram var
+    m.addAsm(5, null, `
+    GiveHyperArmour:
+    ; From previous code
+        lda #$ff.b
+        tsb $1fcc.w
+        lda #$02.b
+        tsb $0a84.w
+        lda #$01.b
+        sta $${hexc(gotHyperArmour)}.l
+        rts
+    `);
+    let labelAddr = m.getLabelFullAddr('GiveHyperArmour');
+    let addrInBank = (labelAddr % 0x8000) + 0x8000;
+    writeWord(rom, conv(5, 0xc7d7), addrInBank);
+
+    // Hyper Armour loads its tile data with the right ram var
+    m.addAsm(4, 0xb70a, `
+        lda $${hexc(gotHyperArmour)}.l
+        cmp #$01.b
+        nop
+    `);
+
     // Get the right text idx for Dr Light
     m.addAsm(2, 0xfd02, `
         jsr SetCapsuleItemGiverTextIdx.l
@@ -718,10 +741,57 @@ function itemRandomize(rom, rng, opts, m) {
     // various hooks to use subtype to determine item, rather than stage
     m.addAsm(0x13, isNormal ? 0xc031 : 0xc034, `
     InitialCapsuleCheck:
-        jsr ConvertNewCapsuleParamToCapsuleItemGivingEntityParam.w
+        jmp _InitialCapsuleCheck.w
+
+    ReturnFrom_InitialCapsuleCheck:
         tay
         nop
         nop
+    `);
+    m.addAsm(0x13, isNormal ? 0xc065 : 0xc05e, `
+    CantGetCapsuleItem:
+    `);
+    m.addAsm(0x13, isNormal ? 0xc06d : 0xc066, `
+    DeleteCapsuleEntity:
+    `);
+    m.addAsm(0x13, isNormal ? 0xc071 : 0xc06a, `
+    GoodToGoWithCapsule:
+    `);
+    m.addAsm(0x13, null, `
+    _InitialCapsuleCheck:
+        jsr ConvertNewCapsuleParamToCapsuleItemGivingEntityParam.w
+        cmp #$08.b
+        bne _returnFrom_IntialCapsuleCheck
+
+        lda wSubTanksAndUpgradesGottenBitfield.w
+        and wHealthTanksGottenBitfield.w
+        cmp #$ff.b
+        bne _makeHyperCapsuleUnavail
+
+    ; Require 4 chips
+        lda wChipsAndRideArmoursGottenBitfield.w
+        cmp #$ff.b
+        bne _makeHyperCapsuleUnavail
+
+        lda wCurrHealth.w
+        cmp wMaxHealth.w
+        bne _makeHyperCapsuleUnavail
+
+        lda $${hexc(gotHyperArmour)}.l
+        cmp #$01.b
+        beq _deleteHyperCapsule
+
+    ; We good
+        jmp GoodToGoWithCapsule.w
+
+    _makeHyperCapsuleUnavail:
+        jmp CantGetCapsuleItem.w
+
+    _deleteHyperCapsule:
+        jmp DeleteCapsuleEntity.w
+
+    _returnFrom_IntialCapsuleCheck:
+        jmp ReturnFrom_InitialCapsuleCheck.w
     `);
     m.addAsm(0x13, 0xc37d, `
         jsr ConvertNewCapsuleParamToCapsuleItemGivingEntityParam.w
@@ -771,6 +841,7 @@ function itemRandomize(rom, rng, opts, m) {
         ConvertNewCapsuleParamToCapsuleItemGivingEntityParam:
         ; this will utterly fail if subtype is 0
         ; acc or idx can be 8/16
+        ; Returns hyper armour = 8, upgrades=0-3, chips=4-7
             pha
             phx
             php
@@ -798,6 +869,10 @@ function itemRandomize(rom, rng, opts, m) {
             tya
             rts
     `);
+
+    // More than 1 chip can be gotten
+    if (isNormal)
+        rom[conv(0x13, 0xc05b)] = 0x80; // bra
 
     // Make capsule tile offset not fixed
     m.addAsm(0x13, isNormal ? 0xc075 : 0xc06e, `
