@@ -162,6 +162,13 @@
               <input type="checkbox" v-model="random_boss_drop">
             </div>
           </div>
+
+          <div class="field">
+            <label class="label">Random Player HP</label>
+            <div class="control">
+              <input type="checkbox" v-model="random_player_hp">
+            </div>
+          </div>
         </div>
 
         <div v-show="tab==='colours'">
@@ -315,6 +322,7 @@
           max_boss_hp: 36,
           random_boss_weakness: false,
           random_boss_drop: false,
+          random_player_hp: false,
 
           // colours
           chaos_palettes: false,

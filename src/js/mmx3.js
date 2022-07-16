@@ -22,6 +22,7 @@ function randomize(_rom, rng, opts) {
         wJoy1CurrBtnsPressed: 0xac,
         wCurrHealth: 0x9ff,
         wNumLives: 0x1fb4,
+        wFrameCounter: 0x9cf,
     }, {
         0x03: isNormal ? 0xfa74 : 0xfa79,
         0x05: 0xfbee,
@@ -217,6 +218,30 @@ function randomize(_rom, rng, opts) {
             }
         }
         m.bankEnds[0x06] += 8;
+    }
+
+    if (opts.random_player_hp) {
+        m.addAsm(0, 0xa1cb, `
+            jsr RandoPlayerHealth.l
+            nop
+        `);
+        m.addAsm(null, null, `
+        RandoPlayerHealth:
+            lda wFrameCounter.w
+            and #$0f.b
+            clc
+            adc #$08.b
+            ora #$80.b
+            sta wCurrHealth.w
+            rtl
+        `);
+        // prevent health being capped, nops for zero mod
+        m.addAsm(3, 0x9074, `
+            nop
+            nop
+            nop
+            sta wCurrHealth.w
+        `);
     }
 
     // Add randomizer text + version
