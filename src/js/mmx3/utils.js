@@ -88,6 +88,11 @@ const replaceText = function(rom, textIdx, isNormal, text) {
     }
 }
 
+const setPaletteAddr = function(rom, stage, dynIdx, entryIdx, newVal) {
+    let start = getDynamicSpriteData(rom, stage, dynIdx, entryIdx);
+    writeWord(rom, start+1, newVal);
+}
+
 const setPaletteSlot = function(rom, stage, dynIdx, entryIdx, newVal) {
     let start = getDynamicSpriteData(rom, stage, dynIdx, entryIdx);
     rom[start+5] = newVal;

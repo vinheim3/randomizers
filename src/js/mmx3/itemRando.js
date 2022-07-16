@@ -130,15 +130,14 @@ function itemRandomize(rom, rng, opts, m) {
             minimapMarkerEntry: 0,
             textIdx: 0x5b,
         },
-        // TODO: tile limitations prevent this
-        // {
-        //     name: "Crush Crawfish Heart Tank",
-        //     stageIdx: STAGE_CRUSH_CRAWFISH,
-        //     entityEntry: findStageEntityData(rom, STAGE_CRUSH_CRAWFISH, ...ENT_HEART_TANK),
-        //     dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_CRUSH_CRAWFISH, 2, 2),
-        //     minimapMarkerEntry: 2,
-        //     textIdx: 0x24,
-        // },
+        {
+            name: "Crush Crawfish Heart Tank",
+            stageIdx: STAGE_CRUSH_CRAWFISH,
+            entityEntry: findStageEntityData(rom, STAGE_CRUSH_CRAWFISH, ...ENT_HEART_TANK),
+            dynamicSpriteEntry: getDynamicSpriteData(rom, STAGE_CRUSH_CRAWFISH, 2, 2),
+            minimapMarkerEntry: 2,
+            textIdx: 0x24,
+        },
         {
             name: "Doppler 1 Capsule",
             itemName: "Hyper Armour",
@@ -374,13 +373,6 @@ function itemRandomize(rom, rng, opts, m) {
             stageSelItemFlagAddrText[base+3] = item.textIdx;
         }
     }
-
-    // Cater to Crush Crawfish Heart Tank (3rd entry)
-    let base = (STAGE_CRUSH_CRAWFISH-1) * 4*3 + 2 * 4;
-    stageSelItemFlagAddrText[base] = 0x20;
-    stageSelItemFlagAddrText[base+1] = 0xd4;
-    stageSelItemFlagAddrText[base+2] = 0x1f;
-    stageSelItemFlagAddrText[base+3] = 0x24;
 
     m.addAsm(null, null, `
     StageSelItemFlagAddrText:

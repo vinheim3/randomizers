@@ -559,7 +559,7 @@ class M65816 {
             placeBank = 0x13;
         }
 
-        // handle 'free' asm (todo: free bank for jsl calls)
+        // handle 'free' asm
         if (placeAddr === null) {
             placeAddr = this.bankEnds[placeBank];
             this.bankEnds[placeBank] += offs;
