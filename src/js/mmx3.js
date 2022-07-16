@@ -159,7 +159,7 @@ function randomize(_rom, rng, opts) {
                 nop
             `);
 
-            m.addAsm(0x13, null, `
+            m.addAsm(null, null, `
             ; A - stage idx in lower byte
             ; Return new stage idx in X
             StageRemappedForSubWepRewardAccu16:
@@ -184,7 +184,7 @@ function randomize(_rom, rng, opts) {
                 nop
             `);
 
-            m.addAsm(0x13, null, `
+            m.addAsm(null, null, `
             StageRemappedForSubWepRewardAccu16:
                 lda wStageIdx.w
                 tax
@@ -219,6 +219,61 @@ function randomize(_rom, rng, opts) {
         m.bankEnds[0x06] += 8;
     }
 
+    // Add randomizer text + version
+    m.addAsm(0, 0x8ef8, `
+        jsr AddTmAndRandoDetails.l
+        nop
+    `);
+    let majorVersion = 0;
+    let minorVersion = 0;
+    let patchVersion = 0;
+    let text = `Randomizer v${majorVersion}.${minorVersion}.${patchVersion}`;
+    m.addAsm(null, null, `
+    RandomizerText:
+    `);
+    let chosenBank = m.getLabelBank('RandomizerText');
+    m.addBytes(chosenBank, text.split('').map(ch=>ch.charCodeAt(0)), rom);
+    m.addBytes(chosenBank, [0], rom);
+
+    m.addAsm(null, null, `
+    AddTmAndRandoDetails:
+    ; From prev code, but with a far call
+        lda #$04.b
+        jsr $868d.l ; FarCopySimpleSetsOfTiles
+
+        ldx $a5.b ; mini dma struct
+        lda #$80.b
+        sta $600.w,X ; vmain
+        inx
+        lda #$cb.b
+        sta $600.w,X ; vram lo
+        inx
+        lda #$09.b
+        sta $600.w,X ; vram hi
+        inx
+        lda #${text.length*2}.b
+        sta $600.w,X ; num bytes
+        inx
+        txy
+        ldx #$00.b
+    _nextRandomizerTextChar:
+        lda RandomizerText.l,X
+        beq _endRandomizerText
+
+        sta $600.w,Y
+        iny
+        lda #$20.b
+        sta $600.w,Y
+        iny
+        inx
+        bra _nextRandomizerTextChar
+
+    _endRandomizerText:
+        tyx
+        stx $a5.b
+        rtl
+    `);
+
     // qol - quicker leg upgrade shot
     rom[conv(0x3f, 0xd251)] = 3;
 
@@ -226,7 +281,7 @@ function randomize(_rom, rng, opts) {
     m.addAsm(8, 0x8604, `
         jsr CheckSoftReset.l
     `);
-    m.addAsm(0x13, null, `
+    m.addAsm(null, null, `
     CheckSoftReset:
     ; From overwritten code
         and wJoy1CurrButtonsHeld.b

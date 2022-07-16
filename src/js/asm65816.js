@@ -446,6 +446,8 @@ class M65816 {
             return [0x8d, ...this.getAbs('sta', tokens.slice(0,1), getSize)];
         } else if (tokens[tokens.length-3] == 'w' && tokens[tokens.length-2] == ',' && tokens[tokens.length-1] == 'X') {
             return [0x9d, ...this.getAbs('sta', tokens.slice(0,1), getSize)];
+        } else if (tokens[tokens.length-3] == 'w' && tokens[tokens.length-2] == ',' && tokens[tokens.length-1] == 'Y') {
+            return [0x99, ...this.getAbs('sta', tokens.slice(0,1), getSize)];
         } else {
             throw new Error(`Could not process sta ${tokens}`);
         }
@@ -487,8 +489,16 @@ class M65816 {
         return [0x7b];
     }
 
+    txy(tokens, getSize) {
+        return [0x9b];
+    }
+
     tya(tokens, getSize) {
         return [0x98];
+    }
+
+    tyx(tokens, getSize) {
+        return [0xbb];
     }
 
     xba(tokens, getSize) {
@@ -544,6 +554,11 @@ class M65816 {
             this.labels[labelName] = [name, offs];
         }
 
+        if (placeBank === null) {
+            // todo: proper logic
+            placeBank = 0x13;
+        }
+
         // handle 'free' asm (todo: free bank for jsl calls)
         if (placeAddr === null) {
             placeAddr = this.bankEnds[placeBank];
@@ -560,6 +575,20 @@ class M65816 {
             placement: placement,
             bank: placeBank,
         };
+    }
+
+    addBytes(placeBank, bs, rom) {
+        let start = conv(placeBank, this.bankEnds[placeBank]);
+        for (let b of bs) {
+            rom[start++] = b;
+        }
+        this.bankEnds[placeBank] += bs.length;
+    }
+
+    getLabelBank(label) {
+        let blockName = this.labels[label][0];
+        let deets = this.asm[blockName];
+        return deets.bank;
     }
 
     compile(rom) {

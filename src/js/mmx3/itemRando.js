@@ -382,15 +382,11 @@ function itemRandomize(rom, rng, opts, m) {
     stageSelItemFlagAddrText[base+2] = 0x1f;
     stageSelItemFlagAddrText[base+3] = 0x24;
 
-    m.addAsm(0x13, null, `
+    m.addAsm(null, null, `
     StageSelItemFlagAddrText:
     `);
-    start = conv(0x13, m.bankEnds[0x13]);
-    for (let i = 0; i < stageSelItemFlagAddrText.length; i++) {
-        rom[start+i] = stageSelItemFlagAddrText[i];
-    }
-    
-    m.bankEnds[0x13] += stageSelItemFlagAddrText.length;
+    let chosenBank = m.getLabelBank('StageSelItemFlagAddrText');
+    m.addBytes(chosenBank, stageSelItemFlagAddrText, rom);
 
     // qol - minimap marker can cater to hyper armour
     m.addAsm(4, 0x9080, `
@@ -398,7 +394,7 @@ function itemRandomize(rom, rng, opts, m) {
         jsr CheckMinimapMarkerForHyperArmour.l
         nop
     `);
-    m.addAsm(0x13, null, `
+    m.addAsm(null, null, `
     CheckMinimapMarkerForHyperArmour:
         lda $000a.w
         cmp #$f0.b
@@ -475,7 +471,7 @@ function itemRandomize(rom, rng, opts, m) {
             nop
             nop
         `);
-        m.addAsm(0x13, null, `
+        m.addAsm(null, null, `
         ; A - text line
         ; A8 I8
         ZeroModAddTextThreadForStageSelect:
@@ -514,7 +510,7 @@ function itemRandomize(rom, rng, opts, m) {
             rtl
         `);
     }
-    m.addAsm(0x13, null, `
+    m.addAsm(null, null, `
     ; A - text line
     ; A8 I8
     AddTextThreadForStageSelect:
