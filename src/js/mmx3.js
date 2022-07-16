@@ -219,6 +219,9 @@ function randomize(_rom, rng, opts) {
         m.bankEnds[0x06] += 8;
     }
 
+    // qol - quicker leg upgrade shot
+    rom[conv(0x3f, 0xd251)] = 3;
+
     // qol - exit stage anytime
     m.addAsm(8, 0x8604, `
         jsr CheckSoftReset.l
