@@ -15,6 +15,7 @@
     <script src="src/js/mmx3/prep.js"></script>
     <script src="src/js/mmx3/itemRando.js"></script>
     <script src="src/js/mmx3/paletteRando.js"></script>
+    <script src="src/js/mmx3/enemyRando.js"></script>
     <script src="src/js/mmx3.js"></script>
     <script>
       var crc32=function(r){for(var a,o=[],c=0;c<256;c++){a=c;for(var f=0;f<8;f++)a=1&a?3988292384^a>>>1:a>>>1;o[c]=a}for(var n=-1,t=0;t<r.length;t++)n=n>>>8^o[255&(n^r.charCodeAt(t))];return(-1^n)>>>0};
@@ -105,6 +106,11 @@
               <a href="#">Beta Testing</a>
             </li>
           </ul>
+          <ul>
+            <li v-bind:class="isTabSelected('changelog')" v-on:click="selectTab('changelog')">
+              <a href="#">Changelog</a>
+            </li>
+          </ul>
         </div>
 
         <div v-show="tab==='qol'">
@@ -167,6 +173,13 @@
             <label class="label">Random Player HP</label>
             <div class="control">
               <input type="checkbox" v-model="random_player_hp">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Random Enemies</label>
+            <div class="control">
+              <input type="checkbox" v-model="random_enemies">
             </div>
           </div>
         </div>
@@ -235,6 +248,35 @@
             <div class="control">
               <input type="checkbox" v-model="no_knockback">
             </div>
+          </div>
+        </div>
+
+        <div v-show="tab==='changelog'">
+          <div class="content">
+            <div class="title">Changelog</div>
+
+            <div class="subtitle">v0.0.1</div>
+
+            <ul>
+              <li>Enemy rando</li>
+            </ul>
+
+            <div class="subtitle">v0.0.0</div>
+
+            <ul>
+              <li>Skip Intro</li>
+              <li>Always show items in Stage Select</li>
+              <li>Subweapon scavenger hunt</li>
+              <li>Random boss HP</li>
+              <li>Random boss weakness</li>
+              <li>Random player HP</li>
+              <li>Random enemies</li>
+              <li>Chaos colours</li>
+              <li>HSL random offsets</li>
+              <li>Gameboy green/grey</li>
+              <li>Virtual boy</li>
+              <li>SNES grey</li>
+            </ul>
           </div>
         </div>
 
@@ -329,6 +371,7 @@
           random_boss_weakness: false,
           random_boss_drop: false,
           random_player_hp: false,
+          random_enemies: false,
 
           // colours
           chaos_palettes: false,

@@ -15,8 +15,172 @@ const ITEMID_SUBTANK = 0x05;
 const ITEMID_HEART_TANK = 0x0b;
 const ITEMID_RIDE_ARMOUR_ITEM = 0x17;
 
+const MAJOR_VERSION = 0;
+const MINOR_VERSION = 0;
+const PATCH_VERSION = 1;
+
+/*
+    auto-get where missing:
+    * pal_idx
+    * sub_idx
+*/ 
+const ENEMIES = {
+    'Blady': {
+        id: 0x03,
+        decomp_idx: 0x1a,
+        decomp_size: 0x500,
+    },
+    'Earth Commander': {
+        id: 0x06,
+        decomp_idx: 0x05,
+        decomp_size: 0x500,
+    },
+    'Notor Banger': {
+        id: 0x08,
+        decomp_idx: 0x02,
+        decomp_size: 0x400,
+        sub_idx: 0, // bit 7 set means affected by conveyor? and 1 means moves?
+    },
+    'Caterkiller': {
+        id: 0x0b,
+        decomp_idx: 0x08,
+        decomp_size: 0x200,
+        sub_idx: 0, // bit 7 set means attached to left wall? TODO
+    },
+    'Drimole W': {
+        id: 0x0c,
+        decomp_idx: 0x03,
+        decomp_size: 0x400,
+    },
+    'Helit': {
+        id: 0x0d,
+        decomp_idx: 0x04,
+        decomp_size: 0x200,
+    },
+    // 'Wall Cancer': {
+    //     id: 0x0e,
+    //     decomp_idx: null,
+    //     decomp_size: null,
+    // },
+    'Crablaster': {
+        id: 0x11,
+        decomp_idx: 0x11,
+        decomp_size: 0x500,
+        sub_idx: 0, // b0 means upside down TODO
+    },
+    'Meta Capsule': {
+        id: 0x16,
+        decomp_idx: 0x29,
+        decomp_size: 0x200,
+        sub_idx: 0, // 0 - floor, 1 - ceiling TODO
+    },
+    'Head Gunner Customer': {
+        id: 0x18,
+        decomp_idx: 0x28,
+        decomp_size: 0x500,
+        pal_idx: 0x1d2,
+        sub_idx: 0, // 1 faces right, 2 faces left, 0.. ???, 80 doppler 1
+    },
+    'Head Gunner Masspro': {
+        id: 0x18,
+        decomp_idx: 0x28,
+        decomp_size: 0x500,
+        pal_idx: 0x86,
+        sub_idx: 0x80, // 1 faces right, 2 faces left, 0.. ???, 80 doppler 1
+    },
+    'Mine Tortoise': {
+        id: 0x1c,
+        decomp_idx: 0x15,
+        decomp_size: 0x500,
+    },
+    'Wild Tank': {
+        id: 0x1d,
+        decomp_idx: 0x21,
+        decomp_size: 0x400,
+    },
+    'Victoroid': {
+        id: 0x1e,
+        decomp_idx: 0x20,
+        decomp_size: 0x800,
+        pal_idx: 0x82,
+        sub_idx: 0,
+    },
+    'Victoroid Customer': {
+        id: 0x1e,
+        decomp_idx: 0x20,
+        decomp_size: 0x800,
+        pal_idx: 0x1d0,
+        sub_idx: 1,
+    },
+    'Tombort': {
+        id: 0x1f,
+        decomp_idx: 0x4a,
+        decomp_size: 0x300,
+    },
+    'Atareeter': {
+        id: 0x22,
+        decomp_idx: 0x4b,
+        decomp_size: 0x400,
+    },
+    'Snow Rider': {
+        id: 0x23,
+        decomp_idx: 0x12,
+        decomp_size: 0x400,
+        sub_idx: 2,
+    },
+    'Snow Slider': {
+        id: 0x23,
+        decomp_idx: 0x12,
+        decomp_size: 0x400,
+        sub_idx: 0,
+    },
+    'Walk Blaster': {
+        id: 0x28,
+        decomp_idx: 0x50,
+        decomp_size: 0x300,
+    },
+    'Ice De Voux': {
+        id: 0x29,
+        decomp_idx: 0x57,
+        decomp_size: 0x400,
+        pal_idx: 0x1c6,
+        sub_idx: 2, // other ice is 3,4
+    },
+    'Iwan De Voux': {
+        id: 0x29,
+        decomp_idx: 0x57,
+        decomp_size: 0x400,
+        pal_idx: 0xf4,
+        sub_idx: 5, // other rock is 83,82,7,88,9
+    },
+    // 'Drill Waying': {
+    //     id: 0x2b,
+    //     decomp_idx: 0x4f,
+    //     decomp_size: 0x300,
+    // },
+    'Hamma Hamma': {
+        id: 0x2d,
+        decomp_idx: 0x5d,
+        decomp_size: 0x500,
+        sub_idx: 0, // 1 - destroys crush crawfish bridge, 2 - destroys crush crawfish boat
+    },
+    'Ganseki Carrier': {
+        id: 0x35,
+        decomp_idx: 0x8a,
+        decomp_size: 0x500,
+        sub_idx: 2, // with rocks is 1
+    },
+    'Trapper': {
+        id: 0x3d,
+        decomp_idx: 0xc6,
+        decomp_size: 0x300,
+        sub_idx: 0, // 0 - long moving laser, 1 - short unmoving laser, 2 - short moving laser
+    },
+}
+
 const ENEMYID_HANGERTER = 0x4c;
 const ENEMYID_CAPSULE = 0x4d;
+
 const ENEMYID_BLIZZARD_BUFFALO = 0x52;
 const ENEMYID_BLAST_HORNET = 0x53;
 const ENEMYID_CRUSH_CRAWFISH = 0x54;

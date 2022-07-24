@@ -22,6 +22,11 @@ const hexc = function(num) {
 // MMX3
 
 const findStageEntityData = function(rom, stageIdx, majorType, type) {
+    // +0 main type
+    // +1/2 Y coord
+    // +3 entity ID
+    // +4 sub ID
+    // +5/6 X coord
     const table = conv(0x3c, 0xce4b);
     let start = conv(0x3c, readWord(rom, table + stageIdx*2));
     let lastCol = null;
@@ -45,6 +50,10 @@ const findStageEntityData = function(rom, stageIdx, majorType, type) {
 }
 
 const getDynamicSpriteData = function(rom, stageIdx, dynIdx, entryIdx) {
+    // +0 decomp id
+    // +1/2 vram dest
+    // +3/4 palette id
+    // +5 palette slot
     const table = conv(8, 0x8623);
     const stageOffs = readWord(rom, table+stageIdx*2);
     const dynOffs = readWord(rom, table+stageOffs+dynIdx*2);

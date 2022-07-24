@@ -37,6 +37,7 @@ function randomize(_rom, rng, opts) {
     prep(rom, rng, opts, m);
     let newSlots = itemRandomize(rom, rng, opts, m);
     paletteRandomize(rom, rng, opts, m);
+    enemyRandomize(rom, rng, opts, m);
 
     // Clear some ram vars
     m.addAsm(0, 0x800e, `
@@ -263,10 +264,8 @@ function randomize(_rom, rng, opts) {
         jsr AddTmAndRandoDetails.l
         nop
     `);
-    let majorVersion = 0;
-    let minorVersion = 0;
-    let patchVersion = 0;
-    let text = `Randomizer v${majorVersion}.${minorVersion}.${patchVersion}`;
+    
+    let text = `Randomizer v${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}`;
     m.addAsm(null, null, `
     RandomizerText:
     `);
