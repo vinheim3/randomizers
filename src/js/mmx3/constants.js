@@ -158,12 +158,12 @@ const ENEMIES = {
     //     decomp_idx: 0x4f,
     //     decomp_size: 0x300,
     // },
-    'Hamma Hamma': {
-        id: 0x2d,
-        decomp_idx: 0x5d,
-        decomp_size: 0x500,
-        sub_idx: 0, // 1 - destroys crush crawfish bridge, 2 - destroys crush crawfish boat
-    },
+    // 'Hamma Hamma': {
+    //     id: 0x2d,
+    //     decomp_idx: 0x5d,
+    //     decomp_size: 0x500,
+    //     sub_idx: 0, // 1 - destroys crush crawfish bridge, 2 - destroys crush crawfish boat
+    // },
     'Ganseki Carrier': {
         id: 0x35,
         decomp_idx: 0x8a,
