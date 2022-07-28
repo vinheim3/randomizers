@@ -15,7 +15,6 @@ function randomize(_rom, rng, opts) {
         let maxLoops = 1000;
         let entry = 0;
         while (maxLoops-- !== 0) {
-            if (rom[addr]&1) break;
             let itemVal = readWord(rom, addr+4);
             let itemType = itemVal>>12;
             if (itemType!==3) {
@@ -24,8 +23,9 @@ function randomize(_rom, rng, opts) {
                     entry: entry,
                     src: addr+4,
                 });
-                itemPool.push(readWord(rom, addr+4));
+                itemPool.push(itemVal);
             }
+            if (rom[addr]&1) break;
             entry++;
             addr += 6;
         }
