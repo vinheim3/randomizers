@@ -8,9 +8,12 @@ function randomize(_rom, rng, opts) {
     let end = conv(0xa, 0xa3e0);
     let addrPool = [];
     let itemPool = [];
+    let roomOffs = new Set();
     for (let room = 0; start+room*2 < end; room++) {
         let offs = readWord(rom, start+room*2);
         if (offs===0) continue;
+        if (roomOffs.has(offs)) continue;
+        roomOffs.add(offs);
         let addr = conv(0xa, 0xa000+offs+1);
         let maxLoops = 1000;
         let entry = 0;
