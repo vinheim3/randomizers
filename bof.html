@@ -129,7 +129,7 @@
                   <th>Room</th>
                   <th>Entry</th>
                   <th>Item Type</th>
-                  <th>Item Count</th>
+                  <!-- <th>Item Count</th> -->
                   <th>Item Idx</th>
                   </tr>
               </thead>
@@ -138,7 +138,7 @@
                   <td>{{ hexc(slot.room) }}</td>
                   <td>{{ slot.entry }}</td>
                   <td>{{ itemTypes[slot.item>>12] }}</td>
-                  <td>{{ (slot.item>>8)&0xf }}</td>
+                  <!-- <td>{{ (slot.item>>8)&0xf }}</td> -->
                   <td>{{ hexc(slot.item&0xff) }}</td>
                   </tr>
               </tbody>

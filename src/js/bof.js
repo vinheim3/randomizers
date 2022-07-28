@@ -9,6 +9,22 @@ function randomize(_rom, rng, opts) {
     let addrPool = [];
     let itemPool = [];
     let roomOffs = new Set();
+    let exclude = new Set([
+        0x139,
+        0x13b,
+        0x145,
+        0x154,
+        0x155,
+        0x159,
+        0x15b,
+        0x15d,
+        0x15f,
+        0x165,
+        0x166,
+        0x16a,
+        0x16e,
+        0x172,
+    ])
     for (let room = 0; start+room*2 < end; room++) {
         let offs = readWord(rom, start+room*2);
         if (offs===0) continue;
@@ -20,7 +36,7 @@ function randomize(_rom, rng, opts) {
         while (maxLoops-- !== 0) {
             let itemVal = readWord(rom, addr+4);
             let itemType = itemVal>>12;
-            if (itemType!==3) {
+            if (itemType!==3 && !exclude.has(itemVal)) {
                 addrPool.push({
                     room: room,
                     entry: entry,
