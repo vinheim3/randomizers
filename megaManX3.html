@@ -131,10 +131,10 @@
 
         <div v-show="tab==='game_modes'">
           <div class="field">
-            <label class="label">Scavenger Hunt: Doppler is subweapon-locked</label>
-            <div class="control">
-              <input type="checkbox" v-model="doppler_subwep_locked" disabled="disabled">
-            </div>
+            <label class="radio">
+              <input type="radio" v-model="new_game_mode" value="doppler_subwep_locked">
+              Scavenger Hunt: Doppler is subweapon-locked
+            </label>
             <div class="control">
               Subweapons required: <input min="0" max="8" class="input" type="number" v-model="subweps_required">
             </div>
@@ -186,45 +186,52 @@
 
         <div v-show="tab==='colours'">
           <div class="field">
-            <label class="label">Chaos</label>
-            <div class="control">
-              <input type="checkbox" v-model="chaos_palettes">
-            </div>
+            <label class="radio">
+              <input type="radio" v-model="colours" value="null">
+              None
+            </label>
           </div>
 
           <div class="field">
-            <label class="label">HSL random offsets</label>
-            <div class="control">
-              <input type="checkbox" v-model="hsl_palettes">
-            </div>
+            <label class="radio">
+              <input type="radio" v-model="colours" value="chaos">
+              Chaos
+            </label>
           </div>
 
           <div class="field">
-            <label class="label">GameBoy green</label>
-            <div class="control">
-              <input type="checkbox" v-model="gb_green">
-            </div>
+            <label class="radio">
+              <input type="radio" v-model="colours" value="hsl_palettes">
+              HSL random offsets
+            </label>
           </div>
 
           <div class="field">
-            <label class="label">GameBoy grey</label>
-            <div class="control">
-              <input type="checkbox" v-model="gb_grey">
-            </div>
+            <label class="radio">
+              <input type="radio" v-model="colours" value="gb_green">
+              GameBoy green
+            </label>
           </div>
 
           <div class="field">
-            <label class="label">Virtual Boy</label>
-            <div class="control">
-              <input type="checkbox" v-model="vb_palettes">
-            </div>
+            <label class="radio">
+              <input type="radio" v-model="colours" value="gb_grey">
+              GameBoy grey
+            </label>
           </div>
 
           <div class="field">
-            <label class="label">SNES grey</label>
-            <div class="control">
-              <input type="checkbox" v-model="greyscale">
-            </div>
+            <label class="radio">
+              <input type="radio" v-model="colours" value="vb_palettes">
+              Virtual Boy
+            </label>
+          </div>
+
+          <div class="field">
+            <label class="radio">
+              <input type="radio" v-model="colours" value="greyscale">
+              SNES grey
+            </label>
           </div>
         </div>
 
@@ -361,7 +368,7 @@
           stage_sel_show_items: true,
 
           // new game mode
-          doppler_subwep_locked: true,
+          new_game_mode: "doppler_subwep_locked",
           subweps_required: 8,
 
           // options
@@ -374,12 +381,7 @@
           random_enemies: false,
 
           // colours
-          chaos_palettes: false,
-          hsl_palettes: false,
-          gb_green: false,
-          gb_grey: false,
-          vb_palettes: false,
-          greyscale: false,
+          colours: null,
 
           // beta
           zero_damage: false,
