@@ -40,7 +40,7 @@ function randomize(_rom, rng, opts) {
     enemyRandomize(rom, rng, opts, m);
 
     // Clear some ram vars
-    m.addAsm(0, 0x800e, `
+    m.addAsm(0, isNormal ? 0x800e : 0xff9b, `
         jsr ClearRandoRamVars.l
     `);
     m.addAsm(null, null, `
