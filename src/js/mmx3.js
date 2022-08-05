@@ -51,62 +51,134 @@ function randomize(_rom, rng, opts) {
     `);
 
     // Scavenger hunt: num subweapons required
-    if (isNormal) {
-        for (let addr of [
-            conv(3, 0x8076),
-            conv(0, 0xc255),
-            conv(0, 0xc307),
-            conv(0, 0xc420),
-            conv(0, 0xc459),
-            conv(0, 0xc491),
-        ]) {
-            // `cmp #$08.b`
-            if (rom[addr-1] !== 0xc9) throw new Error(`Invalid num subweapon check ${hexc(addr)}`);
-            rom[addr] = opts.subweps_required;
+    if (opts.new_game_mode === 'doppler_subwep_locked' || opts.new_game_mode === 'doppler_upgrades_locked') {
+        let num_required = opts.new_game_mode === 'doppler_subwep_locked' ? opts.subweps_required : opts.upgrades_required;
+        if (isNormal) {
+            for (let addr of [
+                conv(3, 0x8076),
+                conv(0, 0xc255),
+                conv(0, 0xc307),
+                conv(0, 0xc420),
+                conv(0, 0xc459),
+                conv(0, 0xc491),
+            ]) {
+                // `cmp #$08.b`
+                if (rom[addr-1] !== 0xc9) throw new Error(`Invalid num subweapon check ${hexc(addr)}`);
+                rom[addr] = num_required;
+            }
+
+            rom[conv(0, 0xc2d0)] = 0xb0; // bcs instead of beq after 3:8076
+            rom[conv(0, 0xc421)] = 0x90; // bcc instead of bne after 0:c420
+            rom[conv(0, 0xc492)] = 0x90; // bcc instead of bne after 0:c491
+
+            if (opts.new_game_mode === 'doppler_upgrades_locked') {
+                m.addAsm(3, 0x8065, `
+                    jsr DopplerUpgradeLockCheck.w
+                    jmp $8073.w
+                `);
+                m.addAsm(3, null, `
+                DopplerUpgradeLockCheck:
+                    lda wSubTanksAndUpgradesGottenBitfield.w
+                    stz $2c.b
+                    ldx #$04.b
+                _nextUpdateLockCheck:
+                    lsr
+                    bcc _afterUpgradeLockCheck
+                    inc $2c.b
+                _afterUpgradeLockCheck:
+                    dex
+                    bne _nextUpdateLockCheck
+                    lda $2c.b
+                    rts
+                `);
+            }
+        } else {
+            m.addAsm(3, 0x806c, `
+                jsr ZeroModCheckGotSufficientSubweapons.l
+            `);
+            if (opts.new_game_mode === 'doppler_upgrades_locked') {
+                m.addAsm(null, null, `
+                ; Set A to $ff if got sufficient subweapons
+                ZeroModCheckGotSufficientSubweapons:
+                    php
+                    sep #$30.b
+                    lda #$00.b
+                    pha
+                    lda $7ef4e2.l
+                    ldx #$07.b
+
+                _nextWepInSubwepScavenger:
+                    asl a
+                    bcc _toNextWepInSubwepScavenger
+
+                    pla
+                    inc a
+                    pha
+
+                _toNextWepInSubwepScavenger:
+                    dex
+                    bpl _nextWepInSubwepScavenger
+
+                    pla
+                    cmp #$0${num_required}.b
+                    bcs _sufficientSubweapons1
+
+                    plp
+                    lda #$00.b
+                    rtl
+
+                _sufficientSubweapons1:
+                    plp
+                    lda #$ff.b
+                    rtl
+                `);
+            } else {
+                m.addAsm(null, null, `
+                    php
+                    sep #$30.b
+                    lda wSubTanksAndUpgradesGottenBitfield.w
+                    pha
+
+                    lda $7ef418.l
+                    sta wSubTanksAndUpgradesGottenBitfield.w
+                    jsr $caaa62.l
+                    ora wSubTanksAndUpgradesGottenBitfield.w
+                    sta wSubTanksAndUpgradesGottenBitfield.w
+
+                ; Copied from normal mode
+
+                    lda wSubTanksAndUpgradesGottenBitfield.w
+                    stz $2c.b
+                    ldx #$04.b
+                _nextUpdateLockCheck:
+                    lsr
+                    bcc _afterUpgradeLockCheck
+                    inc $2c.b
+                _afterUpgradeLockCheck:
+                    dex
+                    bne _nextUpdateLockCheck
+                    lda $2c.b
+
+                ; End of copy
+
+                    cmp #$0${num_required}.b
+                    bcs _sufficientSubweapons2
+
+                    pla
+                    sta wSubTanksAndUpgradesGottenBitfield.w
+                    plp
+                    lda #$00.b
+                    rtl
+
+                sufficientSubweapons1:
+                    pla
+                    sta wSubTanksAndUpgradesGottenBitfield.w
+                    plp
+                    lda #$ff.b
+                    rtl
+                `);
+            }
         }
-
-        rom[conv(0, 0xc2d0)] = 0xb0; // bcs instead of beq after 3:8076
-        rom[conv(0, 0xc421)] = 0x90; // bcc instead of bne after 0:c420
-        rom[conv(0, 0xc492)] = 0x90; // bcc instead of bne after 0:c491
-    } else {
-        m.addAsm(3, 0x806c, `
-            jsr ZeroModCheckGotSufficientSubweapons.l
-        `);
-        m.addAsm(null, null, `
-        ; Set A to $ff if got sufficient subweapons
-        ZeroModCheckGotSufficientSubweapons:
-            php
-            sep #$30.b
-            lda #$00.b
-            pha
-            lda $7ef4e2.l
-            ldx #$07.b
-
-        _nextWepInSubwepScavenger:
-            asl a
-            bcc _toNextWepInSubwepScavenger
-
-            pla
-            inc a
-            pha
-
-        _toNextWepInSubwepScavenger:
-        	dex
-            bpl _nextWepInSubwepScavenger
-
-            pla
-            cmp #$0${opts.subweps_required}.b
-            bcs _sufficientSubweapons
-
-            plp
-            lda #$00.b
-            rtl
-
-        _sufficientSubweapons:
-            plp
-            lda #$ff.b
-            rtl
-        `);
     }
 
     // Randomize boss health

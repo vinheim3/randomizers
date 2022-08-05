@@ -469,9 +469,9 @@ function itemRandomize(rom, rng, opts, m) {
         ZeroModAddTextThreadForStageSelect:
             pha
 
-            lda $1fd1.w
+            lda wSubTanksAndUpgradesGottenBitfield.w
             sta $0014.w
-            lda $1fd4.w
+            lda wHealthTanksGottenBitfield.w
             sta $0016.w
             jsr $caaa51.l
             bvs _allHealthTanksGot
@@ -482,21 +482,21 @@ function itemRandomize(rom, rng, opts, m) {
             lda #$ff.b
         
         _setHealthTanksForStageSelItems:
-            sta $1fd4.w
+            sta wHealthTanksGottenBitfield.w
             lda $7ef418.l
-            sta $1fd1.w
+            sta wSubTanksAndUpgradesGottenBitfield.w
             jsr $caaa62.l
-            ora $1fd1.w
-            sta $1fd1.w
+            ora wSubTanksAndUpgradesGottenBitfield.w
+            sta wSubTanksAndUpgradesGottenBitfield.w
 
             pla
             jsr AddTextThreadForStageSelect.l
             pha
 
             lda $0014.w
-            sta $1fd1.w
+            sta wSubTanksAndUpgradesGottenBitfield.w
             lda $0016.w
-            sta $1fd4.w
+            sta wHealthTanksGottenBitfield.w
 
             pla
             rtl

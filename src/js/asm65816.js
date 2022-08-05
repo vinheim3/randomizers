@@ -263,6 +263,8 @@ class M65816 {
         if (tokens.length === 0) throw new Error('No args passed to inc');
         if (tokens[0] === 'a') {
             return [0x1a];
+        } else if (tokens[tokens.length-1] == 'b') {
+            return [0xe6, ...this.getDp('inc', tokens.slice(0,1), getSize)];
         } else {
             throw new Error(`Could not process inc ${tokens}`);
         }
@@ -476,6 +478,15 @@ class M65816 {
             return [0x8c, ...this.getAbs('sty', tokens.slice(0,1), getSize)];
         } else {
             throw new Error(`Could not process sty ${tokens}`);
+        }
+    }
+
+    stz(tokens, getSize) {
+        if (tokens.length === 0) throw new Error('No args passed to stz');
+        if (tokens[tokens.length-1] == 'b') {
+            return [0x64, ...this.getDp('stz', tokens.slice(0,1), getSize)];
+        } else {
+            throw new Error(`Could not process stz ${tokens}`);
         }
     }
 

@@ -135,8 +135,32 @@
               <input type="radio" v-model="new_game_mode" value="doppler_subwep_locked">
               Scavenger Hunt: Doppler is subweapon-locked
             </label>
+          </div>
+          <div class="field">
             <div class="control">
-              Subweapons required: <input min="0" max="8" class="input" type="number" v-model="subweps_required">
+              Subweapons required: 
+              <input 
+                min="0" max="8" class="input" type="number" 
+                v-model="subweps_required"
+                :disabled="new_game_mode!=='doppler_subwep_locked'"
+              >
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="radio">
+              <input type="radio" v-model="new_game_mode" value="doppler_upgrades_locked">
+              Scavenger Hunt: Doppler is upgrades-locked
+            </label>
+          </div>
+          <div class="field">
+            <div class="control">
+              Upgrades required: 
+              <input 
+                min="0" max="8" class="input" type="number" 
+                v-model="upgrades_required"
+                :disabled="new_game_mode!=='doppler_upgrades_locked'"
+              >
             </div>
           </div>
         </div>
@@ -370,6 +394,7 @@
           // new game mode
           new_game_mode: "doppler_subwep_locked",
           subweps_required: 8,
+          upgrades_required: 0,
 
           // options
           random_boss_hp: false,
