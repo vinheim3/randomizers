@@ -15,10 +15,6 @@ const ITEMID_SUBTANK = 0x05;
 const ITEMID_HEART_TANK = 0x0b;
 const ITEMID_RIDE_ARMOUR_ITEM = 0x17;
 
-const MAJOR_VERSION = 0;
-const MINOR_VERSION = 0;
-const PATCH_VERSION = 1;
-
 /*
     auto-get where missing:
     * pal_idx

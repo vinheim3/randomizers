@@ -8,6 +8,12 @@
     <!--script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script-->
     <script src="vue_2_6_12.js"></script>
     <script src="seedrandom.js"></script>
+
+    <script>
+      const MAJOR_VERSION = 0;
+      const MINOR_VERSION = 0;
+      const PATCH_VERSION = 2;
+    </script>
     <script src="src/js/asm65816.js"></script>
     <script src="src/js/mmx3/utils.js"></script>
     <script src="src/js/mmx3/constants.js"></script>
@@ -45,7 +51,7 @@
         <p><a href="index.html">back</a></p>
 
         <h1 class="title">
-          Mega Man X3 Randomizer
+          Mega Man X3 Randomizer v{{ MAJOR_VERSION }}.{{ MINOR_VERSION }}.{{ PATCH_VERSION }}
         </h1>
 
         <div class="file">
@@ -286,6 +292,12 @@
           <div class="content">
             <div class="title">Changelog</div>
 
+            <div class="subtitle">v0.0.2</div>
+
+            <ul>
+              <li>Upgrades scavenger hunt</li>
+            </ul>
+
             <div class="subtitle">v0.0.1</div>
 
             <ul>
@@ -381,7 +393,7 @@
           showing_spoilers: false,
           romType: 'normal',
           seed: "",
-          tab: "options",
+          tab: "changelog",
           fname_prefix: "",
 
           newSlots: [],
