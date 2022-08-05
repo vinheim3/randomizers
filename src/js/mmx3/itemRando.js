@@ -340,6 +340,27 @@ function itemRandomize(rom, rng, opts, m) {
         break;
     }
 
+    // Prevent Doppler having an upgrade if 4 upgrades required to reach him
+    if (opts.new_game_mode === 'doppler_upgrades_locked' && opts.upgrades_required === '4') {
+        for (let assignedSlot of newSlots) {
+            if (assignedSlot.slot.name !== "Doppler 1 Capsule") continue;
+            if (assignedSlot.item.name.indexOf(" Upgrade") === -1) break;
+
+            console.log('was upgrade', assignedSlot.item.name)
+    
+            for (let assignedSlot2 of newSlots) {
+                if (assignedSlot2.slot.name === assignedSlot.slot.name) continue;
+                if (assignedSlot2.item.name.indexOf(" Upgrade") !== -1) continue;
+    
+                let temp = assignedSlot.item;
+                assignedSlot.item = assignedSlot2.item;
+                assignedSlot2.item = temp;
+                break;
+            }
+            break;
+        }
+    }
+
     /*
     Mutate
     */
