@@ -55,6 +55,10 @@ const hsl2rgb = function(h, s, l) {
 }
 
 function paletteRandomize(rom, rng, opts, m) {
+    const miscPalAddrs = [
+        [conv(7, 0x808a), 1], // X wireframe logo
+    ];
+
     // Randomize palettes
     switch (opts.colours) {
         case 'chaos':
@@ -109,7 +113,6 @@ function paletteRandomize(rom, rng, opts, m) {
                 rgb2snes(0x14, 0x15, 0x08),
                 rgb2snes(0x1a, 0x1a, 0x0b),
             ];
-            console.log('gb_green')
             for (let palAddr of palAddrs) {
                 let start = conv(0xc, palAddr);
                 for (let i = 0; i < 0x20; i += 2) {

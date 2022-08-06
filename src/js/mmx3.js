@@ -434,6 +434,14 @@ function randomize(_rom, rng, opts) {
         `);
     }
 
+    // qol - more subweapons breaks walls/ice that's normally for Tornado Fang
+    if (opts.fragile_walls) {
+        start = conv(0x6, 0xe4f2);
+        for (let i = 0; i < 8; i++) {
+            rom[start+i] = 2;
+        }
+    }
+
     // qol - no damage in most scenarios
     if (opts.zero_damage) {
         m.addAsm(4, 0xce01, `
@@ -456,10 +464,21 @@ function randomize(_rom, rng, opts) {
 
     // qol - small enemies spawn with 1hp
     if (opts.enemies_1hp) {
+        // loading from enemy table
         m.addAsm(2, 0xe184, `
             lda #$01.b
             nop
         `);
+        // Shurikein
+        m.addAsm(0x3c, 0xbf4e, `
+            lda #$01.b
+        `);
+        // bosses
+        for (let [bossName, deets] of Object.entries(bossData)) {
+            let healthAddr = deets.maxHealth;
+            rom[healthAddr] = 1;
+            bossData[bossName].newHealth = 1;
+        }
     }
 
     // Can use ride armour even if no chimera
@@ -529,7 +548,7 @@ function randomize(_rom, rng, opts) {
     for (let [label, deets] of Object.entries(m.labels)) {
         let [blockName, offs] = deets;
         let romOffs = m.asm[blockName].placement + offs;
-        console.log(`Label ${label} at rom offset ${hexc(romOffs)}`);
+        // console.log(`Label ${label} at rom offset ${hexc(romOffs)}`);
     }
 
     return {

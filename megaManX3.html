@@ -133,6 +133,13 @@
               <input type="checkbox" v-model="stage_sel_show_items">
             </div>
           </div>
+
+          <div class="field">
+            <label class="label">More weapons can break walls/ice (todo: normal-only)</label>
+            <div class="control">
+              <input type="checkbox" v-model="fragile_walls">
+            </div>
+          </div>
         </div>
 
         <div v-show="tab==='game_modes'">
@@ -274,14 +281,14 @@
           </div>
 
           <div class="field">
-            <label class="label">Most enemies spawn with 1hp</label>
+            <label class="label">Most enemies spawn with 1hp (todo: normal-only)</label>
             <div class="control">
               <input type="checkbox" v-model="enemies_1hp">
             </div>
           </div>
 
           <div class="field">
-            <label class="label">No knockback (TODO: Prevents capsule use)</label>
+            <label class="label">No knockback (todo: Prevents capsule use)</label>
             <div class="control">
               <input type="checkbox" v-model="no_knockback">
             </div>
@@ -402,6 +409,7 @@
           // qol
           skip_intro: true,
           stage_sel_show_items: true,
+          fragile_walls: false,
 
           // new game mode
           new_game_mode: "doppler_subwep_locked",
