@@ -337,7 +337,7 @@
 
         <div class="btn-margin">
           <a class="button" :disabled="randomized!==true" :download="fname" :href="createBlobURL">Download Randomized ROM</a>
-          <a class="button" :disabled="randomized!==true||romType==='normal'||fname_prefix===''" :download="manifestFname" :href="createManifestBlobURL">Download Randomized Zero Mod Manifest</a>
+          <a class="button" :disabled="randomized!==true||romType==='normal'||fname_prefix===''" :download="manifestFname" :href="createManifestBlobURL">Download Zero Mod Manifest</a>
           <button class="button" :disabled="randomized!==true" v-on:click="toggleSpoilers()">
             <span v-if="showing_spoilers">Hide Spoiler Log</span>
             <span v-if="!showing_spoilers">Show Spoiler Log</span>

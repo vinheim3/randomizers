@@ -53,11 +53,12 @@ const ENEMIES = {
         decomp_idx: 0x04,
         decomp_size: 0x200,
     },
-    // 'Wall Cancer': {
-    //     id: 0x0e,
-    //     decomp_idx: null,
-    //     decomp_size: null,
-    // },
+    'Wall Cancer': {
+        id: 0x0e,
+        decomp_idx: 0x16,
+        decomp_size: 0x300,
+        sub_idx: 0, // 0 on right wall, 1 on left
+    },
     'Crablaster': {
         id: 0x11,
         decomp_idx: 0x11,
@@ -149,17 +150,17 @@ const ENEMIES = {
         pal_idx: 0xf4,
         sub_idx: 5, // other rock is 83,82,7,88,9
     },
-    // 'Drill Waying': {
-    //     id: 0x2b,
-    //     decomp_idx: 0x4f,
-    //     decomp_size: 0x300,
-    // },
-    // 'Hamma Hamma': {
-    //     id: 0x2d,
-    //     decomp_idx: 0x5d,
-    //     decomp_size: 0x500,
-    //     sub_idx: 0, // 1 - destroys crush crawfish bridge, 2 - destroys crush crawfish boat
-    // },
+    'Drill Waying': {
+        id: 0x2b,
+        decomp_idx: 0x4f,
+        decomp_size: 0x300,
+    },
+    'Hamma Hamma': {
+        id: 0x2d,
+        decomp_idx: 0x5d,
+        decomp_size: 0x500,
+        sub_idx: 0, // 1 - destroys crush crawfish bridge, 2 - destroys crush crawfish boat
+    },
     'Ganseki Carrier': {
         id: 0x35,
         decomp_idx: 0x8a,

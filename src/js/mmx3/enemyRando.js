@@ -92,6 +92,14 @@ function enemyRandomize(rom, rng, opts, m) {
                 sub_idx = [...sub_idxes][0];
             }
         }
+        if (name === 'Hamma Hamma') {
+            // 2 story-related hammas + 1 that shares the same dynamic spec
+            dynAddrs.splice(dynAddrs.indexOf(conv(8, 0x8c8f)), 1);
+            dynAddrs.splice(dynAddrs.indexOf(conv(8, 0x8cca)), 1);
+            entAddrs.splice(entAddrs.indexOf(conv(0x3c, 0xe594)), 1);
+            entAddrs.splice(entAddrs.indexOf(conv(0x3c, 0xe6e6)), 1);
+            entAddrs.splice(entAddrs.indexOf(conv(0x3c, 0xe71a)), 1);
+        }
         fullEnemyDeets[name] = {
             ...deets, 
             pal_idx: pal_idx, 
