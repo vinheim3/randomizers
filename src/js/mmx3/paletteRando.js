@@ -59,17 +59,28 @@ function paletteRandomize(rom, rng, opts, m) {
         [conv(7, 0x808a), 1], // X wireframe logo
     ];
 
+    // Add in unused palettes
+    let copyPalAddrs = [...(new Set(palAddrs))].sort();
+    let newPalAddrs = [...(new Set(palAddrs))].sort();
+    for (let i = 0; i < copyPalAddrs.length-1; i++) {
+        let currAddr = copyPalAddrs[i];
+        let nextAddr = copyPalAddrs[i+1];
+        for (let addr = currAddr+0x20; addr < nextAddr; addr += 0x20) {
+            newPalAddrs.push(addr);
+        }
+    }
+
     // Randomize palettes
     switch (opts.colours) {
         case 'chaos':
-            let newPalettes = new Array(palAddrs.length);
+            let newPalettes = new Array(newPalAddrs.length);
             let palPool = [];
-            for (let addr of palAddrs) {
+            for (let addr of newPalAddrs) {
                 let start = conv(0xc, addr);
                 palPool.push(rom.slice(start, start+0x20));
             }
             let unassignedPals = [];
-            for (let i = 0; i < palAddrs.length; i++) unassignedPals.push(i);
+            for (let i = 0; i < newPalAddrs.length; i++) unassignedPals.push(i);
             while (unassignedPals.length !== 0) {
                 let slotIdx = Math.floor(rng() * unassignedPals.length);
                 let palsIdx = Math.floor(rng() * palPool.length);
@@ -78,8 +89,8 @@ function paletteRandomize(rom, rng, opts, m) {
                 palPool.splice(palsIdx, 1);
             }
             // mutate
-            for (let i = 0; i < palAddrs.length; i++) {
-                let palAddr = palAddrs[i];
+            for (let i = 0; i < newPalAddrs.length; i++) {
+                let palAddr = newPalAddrs[i];
                 let start = conv(0xc, palAddr);
                 let pals = newPalettes[i];
                 for (let j = 0; j < 0x20; j++) {
@@ -89,7 +100,7 @@ function paletteRandomize(rom, rng, opts, m) {
             break;
 
         case 'hsl_palettes':
-            for (let palAddr of palAddrs) {
+            for (let palAddr of newPalAddrs) {
                 let start = conv(0xc, palAddr);
                 let hOffs = rng() * 360;
                 let sMult = rng()+0.5;
@@ -113,7 +124,7 @@ function paletteRandomize(rom, rng, opts, m) {
                 rgb2snes(0x14, 0x15, 0x08),
                 rgb2snes(0x1a, 0x1a, 0x0b),
             ];
-            for (let palAddr of palAddrs) {
+            for (let palAddr of newPalAddrs) {
                 let start = conv(0xc, palAddr);
                 for (let i = 0; i < 0x20; i += 2) {
                     let snesCol = readWord(rom, start+i);
@@ -131,7 +142,7 @@ function paletteRandomize(rom, rng, opts, m) {
                 rgb2snes(0x14, 0x00, 0x00),
                 rgb2snes(0x1e, 0x00, 0x00),
             ];
-            for (let palAddr of palAddrs) {
+            for (let palAddr of newPalAddrs) {
                 let start = conv(0xc, palAddr);
                 for (let i = 0; i < 0x20; i += 2) {
                     let snesCol = readWord(rom, start+i);
@@ -149,7 +160,7 @@ function paletteRandomize(rom, rng, opts, m) {
                 rgb2snes(0x14, 0x14, 0x14),
                 rgb2snes(0x1e, 0x1e, 0x1e),
             ];
-            for (let palAddr of palAddrs) {
+            for (let palAddr of newPalAddrs) {
                 let start = conv(0xc, palAddr);
                 for (let i = 0; i < 0x20; i += 2) {
                     let snesCol = readWord(rom, start+i);
@@ -161,7 +172,7 @@ function paletteRandomize(rom, rng, opts, m) {
             break;
 
         case 'greyscale':
-            for (let palAddr of palAddrs) {
+            for (let palAddr of newPalAddrs) {
                 let start = conv(0xc, palAddr);
                 for (let i = 0; i < 0x20; i += 2) {
                     let snesCol = readWord(rom, start+i);
