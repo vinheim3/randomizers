@@ -586,9 +586,11 @@ function randomize(_rom, rng, opts) {
 
     // qol - more subweapons breaks walls/ice that's normally for Tornado Fang
     if (opts.fragile_walls) {
-        start = conv(0x6, 0xe4f2);
-        for (let i = 0; i < 8; i++) {
-            rom[start+i] = 2;
+        let wallWeaknessEntries = getWeaknessTables(rom, 0x0e, isNormal);
+        for (let tableAddr of wallWeaknessEntries) {
+            for (let i = 0; i < 8; i++) {
+                rom[tableAddr+7+i] = 2;
+            }
         }
     }
 

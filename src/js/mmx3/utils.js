@@ -64,6 +64,25 @@ const getEnemyBaseData = function(enemy_idx) {
     return conv(6, 0xe28e+5*(enemy_idx-1));
 }
 
+const getWeaknessTables = function(rom, weaknessIdx, isNormal) {
+    let baseTables;
+    if (isNormal) {
+        baseTables = [conv(6, 0xe4a5)];
+    } else {
+        baseTables = [conv(0x4b, 0x8000), conv(0x4b, 0x8080), conv(0x4b, 0x8100)];
+    }
+    let entries = [];
+    for (let tableAddr of baseTables) {
+        let offsOrAddr = readWord(rom, tableAddr+weaknessIdx*2);
+        if (isNormal) {
+            entries.push(tableAddr + offsOrAddr);
+        } else {
+            entries.push(conv(0x4b, offsOrAddr));
+        }
+    }
+    return entries;
+}
+
 const getTextAddrs = function(rom, textIdx, isNormal) {
     let addrs = [];
     if (isNormal) {
