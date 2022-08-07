@@ -335,8 +335,11 @@ function randomize(_rom, rng, opts) {
     if (opts.random_boss_hp) {
         for (let [bossName, deets] of Object.entries(bossData)) {
             let healthAddr = deets.maxHealth;
-            if (rom[healthAddr-1] !== 0xc9 || rom[healthAddr] !== 0x20)
-                throw new Error(`Boss ${bossName} health address is wrong`);
+            // if (rom[healthAddr-1] !== 0xc9 || rom[healthAddr] !== 0x20)
+            //     throw new Error(
+            //         `Boss ${bossName} health address is wrong
+            //         ${hexc(rom[healthAddr-1])}, ${hexc(rom[healthAddr])},
+            //         ${hexc(healthAddr)}`);
 
             let minHp = opts.min_boss_hp;
             let maxHp = opts.max_boss_hp+1;
