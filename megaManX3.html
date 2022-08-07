@@ -12,7 +12,7 @@
     <script>
       const MAJOR_VERSION = 0;
       const MINOR_VERSION = 0;
-      const PATCH_VERSION = 2;
+      const PATCH_VERSION = 3;
     </script>
     <script src="src/js/asm65816.js"></script>
     <script src="src/js/mmx3/utils.js"></script>
@@ -104,8 +104,13 @@
             </li>
           </ul>
           <ul>
-            <li v-bind:class="isTabSelected('options')" v-on:click="selectTab('options')">
-              <a href="#">Options</a>
+            <li v-bind:class="isTabSelected('random_options')" v-on:click="selectTab('random_options')">
+              <a href="#">Random options</a>
+            </li>
+          </ul>
+          <ul>
+            <li v-bind:class="isTabSelected('misc_options')" v-on:click="selectTab('misc_options')">
+              <a href="#">Misc options</a>
             </li>
           </ul>
           <ul>
@@ -184,7 +189,7 @@
           </div>
         </div>
 
-        <div v-show="tab==='options'">
+        <div v-show="tab==='random_options'">
           <div class="field">
             <label class="label">Random Boss HP</label>
             <div class="control">
@@ -224,6 +229,33 @@
             <div class="control">
               <input type="checkbox" v-model="random_enemies">
             </div>
+          </div>
+        </div>
+
+        <div v-show="tab==='misc_options'">
+          <div class="field">
+            <label class="radio">
+              <input type="radio" v-model="enemy_multipliers" value="0.75">
+              Enemies do .75x damage, and have .75x health
+            </label>
+          </div>
+          <div class="field">
+            <label class="radio">
+              <input type="radio" v-model="enemy_multipliers" value="1">
+              Enemies do 1x damage, and have 1x health
+            </label>
+          </div>
+          <div class="field">
+            <label class="radio">
+              <input type="radio" v-model="enemy_multipliers" value="1.5">
+              Enemies do 1.5x damage, and have 1.5x health
+            </label>
+          </div>
+          <div class="field">
+            <label class="radio">
+              <input type="radio" v-model="enemy_multipliers" value="3">
+              Enemies do 3x damage, and have 3x health
+            </label>
           </div>
         </div>
 
@@ -304,6 +336,13 @@
         <div v-show="tab==='changelog'">
           <div class="content">
             <div class="title">Changelog</div>
+
+            <div class="subtitle">v0.0.3</div>
+
+            <ul>
+              <li>Tornado Fang walls breakable by any subweapon</li>
+              <li>Enemy damage/health multiplier</li>
+            </ul>
 
             <div class="subtitle">v0.0.2</div>
 
@@ -422,7 +461,7 @@
           subweps_required: 8,
           upgrades_required: 0,
 
-          // options
+          // random_options
           random_boss_hp: false,
           min_boss_hp: 16,
           max_boss_hp: 36,
@@ -430,6 +469,9 @@
           random_boss_drop: false,
           random_player_hp: false,
           random_enemies: false,
+
+          // misc options
+          enemy_multipliers: '1',
 
           // colours
           colours: null,
