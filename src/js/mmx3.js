@@ -50,6 +50,14 @@ function randomize(_rom, rng, opts) {
         rtl
     `);
 
+    // Zero mod Zero initialised with 10hp
+    if (!isNormal) {
+        m.addAsm(0x4a, 0x807c, `
+            jsr $8092.w
+            jsr $809e.w
+        `);
+    }
+
     if (opts.enemy_multipliers !== '1') {
         let mult = parseFloat(opts.enemy_multipliers);
 
@@ -465,16 +473,31 @@ function randomize(_rom, rng, opts) {
             jsr RandoPlayerHealth.l
             nop
         `);
-        m.addAsm(null, null, `
-        RandoPlayerHealth:
-            lda wFrameCounter.w
-            and #$0f.b
-            clc
-            adc #$08.b
-            ora #$80.b
-            sta wCurrHealth.w
-            rtl
-        `);
+        if (isNormal) {
+            m.addAsm(null, null, `
+            RandoPlayerHealth:
+                lda wFrameCounter.w
+                and #$0f.b
+                clc
+                adc #$08.b
+                ora #$80.b
+                sta wCurrHealth.w
+                rtl
+            `);
+        } else {
+            m.addAsm(null, null, `
+            RandoPlayerHealth:
+                lda wFrameCounter.w
+                and #$0f.b
+                clc
+                adc #$08.b
+                ora #$80.b
+                sta wCurrHealth.w
+                sta $7ef41a.l
+                sta $7ef44a.l
+                rtl
+            `);
+        }
         // prevent health being capped, nops for zero mod
         m.addAsm(3, 0x9074, `
             nop
