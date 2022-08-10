@@ -12,7 +12,7 @@
     <script>
       const MAJOR_VERSION = 1;
       const MINOR_VERSION = 0;
-      const PATCH_VERSION = 0;
+      const PATCH_VERSION = 1;
     </script>
     <script src="src/js/asm65816.js"></script>
     <script src="src/js/mmx3/utils.js"></script>
@@ -336,6 +336,13 @@
         <div v-show="tab==='changelog'">
           <div class="content">
             <div class="title">Changelog</div>
+
+            <div class="subtitle">v1.0.1</div>
+
+            <ul>
+              <li>Bug: Bosses stuck in an infinite loop if their HP >= 128</li>
+              <li>Bug: Zero would spawn with 0HP in Zero Mod after swapping</li>
+            </ul>
 
             <div class="subtitle">v1.0.0</div>
 

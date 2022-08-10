@@ -352,7 +352,7 @@ function randomize(_rom, rng, opts) {
             let minHp = opts.min_boss_hp;
             let maxHp = opts.max_boss_hp+1;
             let health = Math.floor(rng() * (maxHp-minHp)) + minHp;
-            rom[healthAddr] = health;
+            rom[healthAddr] = Math.min(health, 0x7f);
             bossData[bossName].newHealth = health;
         }
     }
