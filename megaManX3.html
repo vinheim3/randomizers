@@ -62,7 +62,7 @@
                 <i class="fas fa-upload"></i>
               </span>
               <span class="file-label">
-                Upload an un-headered Mega Man X3 regular or Zero Mod ROM
+                Upload an un-headered Mega Man X3 regular or Zero Mod ROM (.sfc)
               </span>
             </span>
           </label>
@@ -81,12 +81,6 @@
           </span>
           <span v-if="correctFileCRCcheck===false" style="color:red">
             Invalid ROM
-          </span>
-        </div>
-
-        <div>
-          <span>
-            Note: Select+B lets you exit a stage
           </span>
         </div>
 
@@ -126,6 +120,11 @@
           <ul>
             <li v-bind:class="isTabSelected('changelog')" v-on:click="selectTab('changelog')">
               <a href="#">Changelog</a>
+            </li>
+          </ul>
+          <ul>
+            <li v-bind:class="isTabSelected('notes')" v-on:click="selectTab('notes')">
+              <a href="#">Notes</a>
             </li>
           </ul>
         </div>
@@ -388,6 +387,34 @@
           </div>
         </div>
 
+        <div v-show="tab==='notes'">
+          <div class="content">
+            <div class="title">Notes</div>
+
+            <div class="subtitle">About Chips</div>
+
+            <ul>
+              <li>You can get all the body part chips, and the hyper chip</li>
+              <li>The 4 body part chips' requirements stay the same (requires their associated upgrade)</li>
+              <li>Hyper chip requires the other 4 body part chips</li>
+            </ul>
+
+            <div class="subtitle">Convenience changes</div>
+
+            <ul>
+              <li>Select+B lets you exit a stage</li>
+              <li>Quicker leg upgrade shot</li>
+              <li>Can get and use ride armours without the Chimaera ride armour</li>
+            </ul>
+
+            <div class="subtitle">Other notes</div>
+
+            <ul>
+              <li>I highly recommend the HSL colour option</li>
+            </ul>
+          </div>
+        </div>
+
         <hr/>
 
         <div class="btn-margin">
@@ -458,7 +485,7 @@
           showing_spoilers: false,
           romType: 'normal',
           seed: "",
-          tab: "changelog",
+          tab: "notes",
           fname_prefix: "",
 
           newSlots: [],
