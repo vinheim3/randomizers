@@ -190,7 +190,7 @@
 
         <div v-show="tab==='random_options'">
           <div class="field">
-            <label class="label">Random Boss HP</label>
+            <label class="label">*Random Boss HP</label>
             <div class="control">
               <input type="checkbox" v-model="random_boss_hp">
             </div>
@@ -203,14 +203,14 @@
           </div>
 
           <div class="field">
-            <label class="label">Random Boss Weakness</label>
+            <label class="label">*Random Boss Weakness</label>
             <div class="control">
               <input type="checkbox" v-model="random_boss_weakness">
             </div>
           </div>
 
           <div class="field">
-            <label class="label">Random Boss Drop</label>
+            <label class="label">*Random Boss Drop</label>
             <div class="control">
               <input type="checkbox" v-model="random_boss_drop">
             </div>
@@ -224,7 +224,7 @@
           </div>
 
           <div class="field">
-            <label class="label">Random Enemies</label>
+            <label class="label">*Random Enemies</label>
             <div class="control">
               <input type="checkbox" v-model="random_enemies">
             </div>
@@ -269,14 +269,14 @@
           <div class="field">
             <label class="radio">
               <input type="radio" v-model="colours" value="chaos">
-              Chaos
+              *Chaos
             </label>
           </div>
 
           <div class="field">
             <label class="radio">
               <input type="radio" v-model="colours" value="hsl_palettes">
-              HSL random offsets
+              *HSL random offsets
             </label>
           </div>
 
@@ -411,6 +411,7 @@
 
             <ul>
               <li>I highly recommend the HSL colour option</li>
+              <li>Options prefixed with * are affected by the seed</li>
             </ul>
           </div>
         </div>
