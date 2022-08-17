@@ -62,7 +62,7 @@
                 <i class="fas fa-upload"></i>
               </span>
               <span class="file-label">
-                Upload an un-headered Mega Man X3 regular or Zero Mod ROM (.sfc)
+                Upload a regular (.sfc/.smc) or Zero Mod (.sfc) ROM
               </span>
             </span>
           </label>
@@ -484,6 +484,7 @@
           randomized_rom: null,
           showing_spoilers: false,
           romType: 'normal',
+          romExt: 'sfc',
           seed: "",
           tab: "notes",
           fname_prefix: "",
@@ -536,9 +537,16 @@
               let crcCheck = crc32(reader.result);
               if (crcCheck === 0xfa0fe671) {
                 app.correctFileCRCcheck = true;
+                app.romType = 'normal';
+                app.romExt = 'sfc';
               } else if (crcCheck === 0x7afec006) {
                 app.correctFileCRCcheck = true;
                 app.romType = 'zeromod';
+                app.romExt = 'sfc';
+              } else if (crcCheck === 0x97f99192) {
+                app.correctFileCRCcheck = true;
+                app.romType = 'normal';
+                app.romExt = 'smc';
               } else {
                 app.correctFileCRCcheck = false;
               }
@@ -562,7 +570,11 @@
 
             // file processing
             reader.onload = function() {
-              let view = new Uint8Array(reader.result);
+              let res = reader.result;
+              if (app.romExt === 'smc') {
+                res = res.slice(0x200);
+              }
+              let view = new Uint8Array(res);
               let return_val = randomize(view, myrng, app);
 
               for (let attr of ['newSlots', 'bossDetails', 'randomized_rom']) {
