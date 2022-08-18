@@ -419,7 +419,8 @@
         <hr/>
 
         <div class="btn-margin">
-          <button class="button" :disabled="correctFileCRCcheck!==true" v-on:click="randomizeRom()">Randomize</button>
+          <button class="button" :disabled="correctFileCRCcheck!==true" v-on:click="randomizeRom(true)">Randomize with new seed</button>
+          <button class="button" :disabled="correctFileCRCcheck!==true" v-on:click="randomizeRom(false)">Randomize</button>
         </div>
 
         <div>
@@ -556,10 +557,10 @@
             reader.readAsBinaryString(selectedFile);
           },
 
-          randomizeRom: function() {
+          randomizeRom: function(forceNewSeed) {
             // use seed if provided, or gen one
             let myrng;
-            if (app.seed === '') {
+            if (app.seed === '' || forceNewSeed) {
               app.seed = +(new Date()); 
             }
             myrng = new Math.seedrandom(app.seed);
