@@ -51,7 +51,7 @@
         <p><a href="index.html">back</a></p>
 
         <h1 class="title">
-          Mega Man X3 Item Randomizer v{{ MAJOR_VERSION }}.{{ MINOR_VERSION }}.{{ PATCH_VERSION }}
+          Mega Man X3 Item Randomizer {{ fullVersion }}
         </h1>
 
         <div class="file">
@@ -72,6 +72,13 @@
           <label class="label">Seed</label>
           <div class="control">
             <input class="input" type="text" v-model="seed" style="width:30%">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Flags</label>
+          <div class="control">
+            <input class="input" type="text" v-model="flags" style="width:30%">
           </div>
         </div>
 
@@ -608,7 +615,7 @@
 
           selectTab: function(tab) {
             this.tab = tab;
-          }
+          },
         },
         computed: {
           createBlobURL: function() {
@@ -653,8 +660,7 @@
           },
 
           fname: function() {
-            let dt = new Date();
-            this.fname_prefix = `mmx3-${dt.toJSON()}`;
+            this.fname_prefix = `mmx3-${this.seed}${this.flags}-${this.fullVersion}`;
             return `${this.fname_prefix}.sfc`;
           },
 
@@ -664,6 +670,33 @@
 
           orderedSlots: function() {
             return this.newSlots.sort((a, b) => a.slot.name < b.slot.name ? -1 : 1);
+          },
+
+          fullVersion: function() {
+            return `v${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}`
+          },
+
+          flags: {
+            get() {
+              let _flags = "";
+              if (this.random_boss_hp) _flags += "h";
+              if (this.random_boss_weakness) _flags += "w";
+              if (this.random_boss_drop) _flags += "d";
+              if (this.random_enemies) _flags += "e";
+              if (this.colours === "chaos") _flags += "c";
+              if (this.colours === "hsl_palettes") _flags += "s";
+              return _flags;
+            },
+
+            set(flag) {
+              this.random_boss_hp = flag.includes("h")
+              this.random_boss_weakness = flag.includes("w")
+              this.random_boss_drop = flag.includes("d")
+              this.random_enemies = flag.includes("e")
+              if (flag.includes("c")) {this.colours = "chaos"}
+              else if (flag.includes("s")) {this.colours = "hsl_palettes"}
+              else this.colours = null;
+            },
           }
         }
       })
