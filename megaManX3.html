@@ -119,11 +119,11 @@
               <a href="#">Colours</a>
             </li>
           </ul>
-          <!-- <ul>
+          <ul v-if="beta==1">
             <li v-bind:class="isTabSelected('beta_test')" v-on:click="selectTab('beta_test')">
               <a href="#">Beta Testing</a>
             </li>
-          </ul> -->
+          </ul>
           <ul>
             <li v-bind:class="isTabSelected('changelog')" v-on:click="selectTab('changelog')">
               <a href="#">Changelog</a>
@@ -485,9 +485,13 @@
       </div>
     </section>
     <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const beta = urlParams.get('beta');
+
       let app = new Vue({
         el: '#app',
         data: {
+          beta: beta,
           correctFileCRCcheck: null,
           randomized: null,
           randomized_rom: null,
