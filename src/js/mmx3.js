@@ -445,7 +445,7 @@ function randomize(_rom, rng, opts) {
             m.addAsm(0x48, 0x975b, `
             StageForSubwepRemapping:
             `);
-        }        
+        }
 
         for (let [bossName, deets] of Object.entries(bossData)) {
             let subwepIdx = Math.floor(rng() * subweaponPool.length);
@@ -455,7 +455,7 @@ function randomize(_rom, rng, opts) {
 
             if (isNormal) {
                 // Stage->subweapon given
-                rom[conv(0x06, m.bankEnds[0x06]+deets.idx)] = subwepToStage[subwepId];
+                rom[conv(0x06, m.bankEnds[0x06]+deets.idx)] = subwepToStage[subwepId]+1;
                 // SubweaponsStatusToAssociatedStage
                 rom[conv(0x06, 0x9c5e+subwepId)] = deets.idx+1;
                 writeWord(rom, deets.subwepReward, 0x1fbc+subwepId*2);

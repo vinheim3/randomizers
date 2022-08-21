@@ -11,8 +11,8 @@
 
     <script>
       const MAJOR_VERSION = 1;
-      const MINOR_VERSION = 0;
-      const PATCH_VERSION = 1;
+      const MINOR_VERSION = 1;
+      const PATCH_VERSION = 0;
     </script>
     <script src="src/js/asm65816.js"></script>
     <script src="src/js/mmx3/utils.js"></script>
@@ -51,7 +51,7 @@
         <p><a href="index.html">back</a></p>
 
         <h1 class="title">
-          Mega Man X3 Item Randomizer v{{ MAJOR_VERSION }}.{{ MINOR_VERSION }}.{{ PATCH_VERSION }}
+          Mega Man X3 Item Randomizer {{ fullVersion }}
         </h1>
 
         <div class="file">
@@ -62,7 +62,7 @@
                 <i class="fas fa-upload"></i>
               </span>
               <span class="file-label">
-                Upload an un-headered Mega Man X3 regular or Zero Mod ROM (.sfc)
+                Upload a regular (.sfc/.smc) or Zero Mod (.sfc) ROM
               </span>
             </span>
           </label>
@@ -72,6 +72,13 @@
           <label class="label">Seed</label>
           <div class="control">
             <input class="input" type="text" v-model="seed" style="width:30%">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Flags</label>
+          <div class="control">
+            <input class="input" type="text" v-model="flags" style="width:30%">
           </div>
         </div>
 
@@ -112,11 +119,11 @@
               <a href="#">Colours</a>
             </li>
           </ul>
-          <!-- <ul>
+          <ul v-if="beta==1">
             <li v-bind:class="isTabSelected('beta_test')" v-on:click="selectTab('beta_test')">
               <a href="#">Beta Testing</a>
             </li>
-          </ul> -->
+          </ul>
           <ul>
             <li v-bind:class="isTabSelected('changelog')" v-on:click="selectTab('changelog')">
               <a href="#">Changelog</a>
@@ -190,7 +197,7 @@
 
         <div v-show="tab==='random_options'">
           <div class="field">
-            <label class="label">Random Boss HP</label>
+            <label class="label">*Random Boss HP</label>
             <div class="control">
               <input type="checkbox" v-model="random_boss_hp">
             </div>
@@ -203,14 +210,14 @@
           </div>
 
           <div class="field">
-            <label class="label">Random Boss Weakness</label>
+            <label class="label">*Random Boss Weakness</label>
             <div class="control">
               <input type="checkbox" v-model="random_boss_weakness">
             </div>
           </div>
 
           <div class="field">
-            <label class="label">Random Boss Drop</label>
+            <label class="label">*Random Boss Drop</label>
             <div class="control">
               <input type="checkbox" v-model="random_boss_drop">
             </div>
@@ -224,7 +231,7 @@
           </div>
 
           <div class="field">
-            <label class="label">Random Enemies</label>
+            <label class="label">*Random Enemies</label>
             <div class="control">
               <input type="checkbox" v-model="random_enemies">
             </div>
@@ -269,14 +276,14 @@
           <div class="field">
             <label class="radio">
               <input type="radio" v-model="colours" value="chaos">
-              Chaos
+              *Chaos
             </label>
           </div>
 
           <div class="field">
             <label class="radio">
               <input type="radio" v-model="colours" value="hsl_palettes">
-              HSL random offsets
+              *HSL random offsets
             </label>
           </div>
 
@@ -335,6 +342,18 @@
         <div v-show="tab==='changelog'">
           <div class="content">
             <div class="title">Changelog</div>
+
+            <div class="subtitle">v1.1.0</div>
+
+            <ul>
+              <li>Allow .smc for normal rom</li>
+              <li>Added flags input</li>
+              <li>Randomized rom file name now based off seed, flags and version</li>
+              <li>Bug: fixed normal rom giving a different weapon for randomized subweapon drop, during the post-defeat animation screen</li>
+              <li>Bug: if Gravity Beetle frog ride armour has a capsule, move it left so we can get the item inside</li>
+              <li>Bug: default upgrades required now set to 4</li>
+              <li>Bug: prevent Blizzard Buffalo heart tank having a capsule (todo: have capsules play nicely when on ride armour)</li>
+            </ul>
 
             <div class="subtitle">v1.0.1</div>
 
@@ -411,6 +430,7 @@
 
             <ul>
               <li>I highly recommend the HSL colour option</li>
+              <li>Options prefixed with * are affected by the seed</li>
             </ul>
           </div>
         </div>
@@ -418,7 +438,8 @@
         <hr/>
 
         <div class="btn-margin">
-          <button class="button" :disabled="correctFileCRCcheck!==true" v-on:click="randomizeRom()">Randomize</button>
+          <button class="button" :disabled="correctFileCRCcheck!==true" v-on:click="randomizeRom(true)">Randomize with new seed</button>
+          <button class="button" :disabled="correctFileCRCcheck!==true" v-on:click="randomizeRom(false)">Randomize</button>
         </div>
 
         <div>
@@ -476,14 +497,19 @@
       </div>
     </section>
     <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const beta = urlParams.get('beta');
+
       let app = new Vue({
         el: '#app',
         data: {
+          beta: beta,
           correctFileCRCcheck: null,
           randomized: null,
           randomized_rom: null,
           showing_spoilers: false,
           romType: 'normal',
+          romExt: 'sfc',
           seed: "",
           tab: "notes",
           fname_prefix: "",
@@ -499,7 +525,7 @@
           // new game mode
           new_game_mode: "doppler_subwep_locked",
           subweps_required: 8,
-          upgrades_required: 0,
+          upgrades_required: 4,
 
           // random_options
           random_boss_hp: false,
@@ -536,9 +562,16 @@
               let crcCheck = crc32(reader.result);
               if (crcCheck === 0xfa0fe671) {
                 app.correctFileCRCcheck = true;
+                app.romType = 'normal';
+                app.romExt = 'sfc';
               } else if (crcCheck === 0x7afec006) {
                 app.correctFileCRCcheck = true;
                 app.romType = 'zeromod';
+                app.romExt = 'sfc';
+              } else if (crcCheck === 0x97f99192) {
+                app.correctFileCRCcheck = true;
+                app.romType = 'normal';
+                app.romExt = 'smc';
               } else {
                 app.correctFileCRCcheck = false;
               }
@@ -547,10 +580,10 @@
             reader.readAsBinaryString(selectedFile);
           },
 
-          randomizeRom: function() {
+          randomizeRom: function(forceNewSeed) {
             // use seed if provided, or gen one
             let myrng;
-            if (app.seed === '') {
+            if (app.seed === '' || forceNewSeed) {
               app.seed = +(new Date()); 
             }
             myrng = new Math.seedrandom(app.seed);
@@ -562,7 +595,11 @@
 
             // file processing
             reader.onload = function() {
-              let view = new Uint8Array(reader.result);
+              let res = reader.result;
+              if (app.romExt === 'smc') {
+                res = res.slice(0x200);
+              }
+              let view = new Uint8Array(res);
               let return_val = randomize(view, myrng, app);
 
               for (let attr of ['newSlots', 'bossDetails', 'randomized_rom']) {
@@ -594,7 +631,7 @@
 
           selectTab: function(tab) {
             this.tab = tab;
-          }
+          },
         },
         computed: {
           createBlobURL: function() {
@@ -639,8 +676,7 @@
           },
 
           fname: function() {
-            let dt = new Date();
-            this.fname_prefix = `mmx3-${dt.toJSON()}`;
+            this.fname_prefix = `mmx3-${this.seed}${this.flags}-${this.fullVersion}`;
             return `${this.fname_prefix}.sfc`;
           },
 
@@ -650,6 +686,33 @@
 
           orderedSlots: function() {
             return this.newSlots.sort((a, b) => a.slot.name < b.slot.name ? -1 : 1);
+          },
+
+          fullVersion: function() {
+            return `v${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}`
+          },
+
+          flags: {
+            get() {
+              let _flags = "";
+              if (this.random_boss_hp) _flags += "h";
+              if (this.random_boss_weakness) _flags += "w";
+              if (this.random_boss_drop) _flags += "d";
+              if (this.random_enemies) _flags += "e";
+              if (this.colours === "chaos") _flags += "c";
+              if (this.colours === "hsl_palettes") _flags += "s";
+              return _flags;
+            },
+
+            set(flag) {
+              this.random_boss_hp = flag.includes("h")
+              this.random_boss_weakness = flag.includes("w")
+              this.random_boss_drop = flag.includes("d")
+              this.random_enemies = flag.includes("e")
+              if (flag.includes("c")) {this.colours = "chaos"}
+              else if (flag.includes("s")) {this.colours = "hsl_palettes"}
+              else this.colours = null;
+            },
           }
         }
       })

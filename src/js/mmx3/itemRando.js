@@ -323,10 +323,12 @@ function itemRandomize(rom, rng, opts, m) {
       available_slots.splice(chosen_slot, 1);
     }
 
-    // Prevent volt catfish heart tank having a capsule
+    // Prevent volt catfish heart tank having a capsule (spikes)
+    // Prevent blizzard buffalo heart tank having a capsule (ride armour issues)
     for (let assignedSlot of newSlots) {
-        if (assignedSlot.slot.name !== "Volt Catfish Heart Tank") continue;
-        if (assignedSlot.item.slot_name.indexOf("Capsule") === -1) break;
+        if (assignedSlot.slot.name !== "Volt Catfish Heart Tank" && 
+            assignedSlot.slot.name !== "Blizzard Buffalo Heart Tank") continue;
+        if (assignedSlot.item.slot_name.indexOf("Capsule") === -1) continue;
 
         for (let assignedSlot2 of newSlots) {
             if (assignedSlot2.slot.name === assignedSlot.slot.name) continue;
@@ -337,7 +339,6 @@ function itemRandomize(rom, rng, opts, m) {
             assignedSlot2.item = temp;
             break;
         }
-        break;
     }
 
     // Prevent Doppler having an upgrade if 4 upgrades required to reach him
@@ -359,6 +360,16 @@ function itemRandomize(rom, rng, opts, m) {
             }
             break;
         }
+    }
+
+    // Move gravity beetle frog ride armour left by 0x18 pixels if it's a capsule
+    for (let assignedSlot of newSlots) {
+        if (assignedSlot.slot.name !== "Gravity Beetle Frog Ride Armour") continue;
+        if (assignedSlot.item.slot_name.indexOf("Capsule") === -1) break;
+
+        start = assignedSlot.slot.entityEntry;
+        rom[start+5] = 0x28;
+        break;
     }
 
     /*
