@@ -11,8 +11,8 @@
 
     <script>
       const MAJOR_VERSION = 1;
-      const MINOR_VERSION = 0;
-      const PATCH_VERSION = 1;
+      const MINOR_VERSION = 1;
+      const PATCH_VERSION = 0;
     </script>
     <script src="src/js/asm65816.js"></script>
     <script src="src/js/mmx3/utils.js"></script>
@@ -342,6 +342,18 @@
         <div v-show="tab==='changelog'">
           <div class="content">
             <div class="title">Changelog</div>
+
+            <div class="subtitle">v1.1.0</div>
+
+            <ul>
+              <li>Allow .smc for normal rom</li>
+              <li>Added flags input</li>
+              <li>Randomized rom file name now based off seed, flags and version</li>
+              <li>Bug: fixed normal rom giving a different weapon for randomized subweapon drop, during the post-defeat animation screen</li>
+              <li>Bug: if Gravity Beetle frog ride armour has a capsule, move it left so we can get the item inside</li>
+              <li>Bug: default upgrades required now set to 4</li>
+              <li>Bug: prevent Blizzard Buffalo heart tank having a capsule (todo: have capsules play nicely when on ride armour)</li>
+            </ul>
 
             <div class="subtitle">v1.0.1</div>
 
