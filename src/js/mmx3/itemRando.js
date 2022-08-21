@@ -361,6 +361,16 @@ function itemRandomize(rom, rng, opts, m) {
         }
     }
 
+    // Move gravity beetle frog ride armour left by 0x18 pixels if it's a capsule
+    for (let assignedSlot of newSlots) {
+        if (assignedSlot.slot.name !== "Gravity Beetle Frog Ride Armour") continue;
+        if (assignedSlot.item.slot_name.indexOf("Capsule") === -1) break;
+
+        start = assignedSlot.slot.entityEntry;
+        rom[start+5] = 0x28;
+        break;
+    }
+
     /*
     Mutate
     */
